@@ -1,0 +1,107 @@
+UI mobile :
+
+
+PAGE QND ON LANCE / PAGE D'ACCUEIL:
+
+
+            Zone de recherche {post, comptes, theme,  }
+            --------------------------------------------------------------
+            Categories de publications {for you/ top/ media/ friends} + mettre un point rouge a côté categories qnd ya du nveau
+            --------------------------------------------------------------
+
+            Corps de post
+                |
+                | *voir Template post tt en bas*
+                |
+                |
+            --------------------------------------------------------------
+
+
+            menu {home, msg, post, compte/paramètres} {point rouge qnd notif}
+
+
+    PAGE QUAND ON FAIT UNE RECHRCHE :
+
+                   fleche retour + {ce qui a été recherché}
+                --------------------------------------------------------------
+                filtres(posts, comptes, mentions, {autre})
+                --------------------------------------------------------------
+
+                Corps de résultat
+                    |
+                    | *voir Template résultats*
+                    |
+                    |
+                --------------------------------------------------------------
+
+
+
+
+PAGE MSG:
+
+            Filtres/gorupes d'envois (tous / MP / grp / personnalisé)
+            ---------------------------------------------------------
+            Corps discussion
+            |
+            |
+            |
+            ---------------------------------------------------------
+            menu (voir page d'accceil)
+
+
+
+
+PAGE COMPTE PERSO :
+
+            photo de profile + nom d'utilisateur / en haut a droite les options vers les paramètres
+            ---------------------------------------------------------------------------------------
+            bio + nb abos + nb suivis 
+            ---------------------------------------------------------------------------------------
+            corps posts du compte
+            |
+            |
+            |
+            |
+            |
+            ---------------------------------
+            menu
+
+
+
+
+
+
+
+---------------------------------------------------------------
+---------------------------------------------------------------
+UI pc :
+ disposition similaire?
+ eventuellemnt 2 pages de posts côte a cote (for you + friends / top + media)
+
+
+
+
+--------------------------------------------------------------
+--------------------------------------------------------------
+
+Idées fonctions
+
+-Caser un truc pr pin les post ~save sur insta
+
+--------------------------------------------------------------
+--------------------------------------------------------------
+
+
+    Template post :
+
+    Pdp + pseudo du gars
+    Titre
+    (en un peu grisé les #XXXXXXXXX)
+    Contenu du post (texte, photos, vidéos, audio)
+    Interactions possible:
+    -Like
+    -Répondre (voir si juste du texte ou carrément une sorte de post en réponse sous le post)
+    -Envoyer (avc posibiliter ajt un msg)
+    -Reporter / ne plus me recommander sur la page for you
+
+
