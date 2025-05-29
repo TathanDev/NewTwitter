@@ -2,19 +2,37 @@
 import { useState } from "react";
 
 export default function ProfileForm({ user }) {
+  console.log("User data:", user);
   const [username, setUsername] = useState(user.pseudo_user);
   const [about, setAbout] = useState(user.description_user);
+  const [pdp, setPdp] = useState(user.pfp_user);
+  let pdp_url = user.pfp_user;
 
   async function handleSubmit(e) {
     e.preventDefault();
+    let pdp_url = user.pfp_user;
+
+    if (pdp && pdp instanceof File) {
+      const formData = new FormData();
+      formData.append("pdp", pdp);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      pdp_url = data.url || data;
+    }
+
     await fetch("/api/user/" + user.id_user, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         pseudo_user: username,
         description_user: about,
+        pfp_user: pdp_url,
       }),
     });
+    location.reload();
   }
 
   return (
@@ -32,6 +50,24 @@ export default function ProfileForm({ user }) {
               src={user.pfp_user}
               alt="Your profile"
               className="size-12 rounded-full bg-gray-50 dark:bg-gray-800"
+            />
+            <input
+              type="file"
+              accept="image/*"
+              className="block w-full text-sm text-gray-900 dark:text-gray-100 file:mr-4 file:rounded-md file:border-0 file:bg-gray-50 dark:file:bg-gray-800 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-100 dark:hover:file:bg-gray-700 focus:outline-none"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (
+                  file &&
+                  user.pfp_user &&
+                  user.pfp_user.endsWith(file.name)
+                ) {
+                  alert("Vous emblez déjà utiliser cette image.");
+                  e.target.value = ""; // Reset the input
+                  return;
+                }
+                setPdp(file);
+              }}
             />
           </div>
         </div>
