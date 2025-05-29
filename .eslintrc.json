@@ -1,6 +1,4 @@
 {
-  "extends": [
-    "stylelint-config-standard",
-    "stylelint-config-tailwindcss"
-  ]
+  "extends": [],
+  "parser": "@babel/eslint-parser"
 }
