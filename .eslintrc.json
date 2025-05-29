@@ -1,3 +1,6 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-tailwindcss"
+  ]
 }

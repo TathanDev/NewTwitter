@@ -1,5 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 
-import { signup } from '@/app/actions/auth'
+import { signup } from "@/app/actions/auth";
 
 export function SignupForm() {
   return (
@@ -17,10 +18,12 @@ export function SignupForm() {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form action={signup}
-            className="space-y-6">
-          <div>
-              <label htmlFor="pseudo" className="block text-sm/6 font-medium text-white">
+          <form action={signup} className="space-y-6">
+            <div>
+              <label
+                htmlFor="pseudo"
+                className="block text-sm/6 font-medium text-white"
+              >
                 Pseudo
               </label>
               <div className="mt-2">
@@ -34,9 +37,11 @@ export function SignupForm() {
               </div>
             </div>
 
-
             <div>
-              <label htmlFor="email" className="block text-sm/6 font-medium text-white">
+              <label
+                htmlFor="email"
+                className="block text-sm/6 font-medium text-white"
+              >
                 Email address
               </label>
               <div className="mt-2">
@@ -53,11 +58,17 @@ export function SignupForm() {
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm/6 font-medium text-white-900">
+                <label
+                  htmlFor="password"
+                  className="block text-sm/6 font-medium text-white-900"
+                >
                   Password
                 </label>
                 <div className="text-sm">
-                  <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                  <a
+                    href="#"
+                    className="font-semibold text-indigo-600 hover:text-indigo-500"
+                  >
                     Forgot password?
                   </a>
                 </div>
@@ -85,14 +96,16 @@ export function SignupForm() {
           </form>
 
           <p className="mt-10 text-center text-sm/6 text-gray-500">
-            Already have an account?{'  '}
-            <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+            Already have an account?{"  "}
+            <a
+              href="#"
+              className="font-semibold text-indigo-600 hover:text-indigo-500"
+            >
               Login
             </a>
           </p>
         </div>
       </div>
     </>
-    
-  )
+  );
 }
