@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 export default function Home() {
@@ -162,13 +164,19 @@ export default function Home() {
 
         {/* Call to action buttons */}
         <section className="flex justify-center gap-6 pt-2">
-          <button className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2">
+          <button
+            onClick={() => (window.location.href = "/login")}
+            className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
+          >
             <span>Se connecter</span>
             <span className="group-hover:translate-x-1 transition-transform duration-300">
               →
             </span>
           </button>
-          <button className="group px-8 py-4 bg-transparent border-2 border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-700 dark:hover:border-blue-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2">
+          <button
+            onClick={() => (window.location.href = "/register")}
+            className="group px-8 py-4 bg-transparent border-2 border-blue-600 dark:border-blue-400 text-blue-600 dark:text-blue-400 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:border-blue-700 dark:hover:border-blue-300 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
+          >
             <span>S'inscrire</span>
             <span className="group-hover:translate-x-1 transition-transform duration-300">
               ✨

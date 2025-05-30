@@ -141,21 +141,12 @@ export default async function NavBar() {
                 transition
                 className="absolute right-0 z-10 mt-3 w-56 origin-top-right rounded-2xl bg-white dark:bg-gray-800 py-2 shadow-xl ring-1 ring-gray-200 dark:ring-gray-700 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in border border-gray-100 dark:border-gray-700"
               >
-                <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    Menu
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Gérez votre compte
-                  </p>
-                </div>
-
                 {profile.map((item, index) => (
                   <MenuItem key={item.name}>
                     <a
                       href={item.href}
                       className={classNames(
-                        "group flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 data-[focus]:bg-gradient-to-r data-[focus]:from-blue-50 data-[focus]:to-purple-50 dark:data-[focus]:from-blue-900/20 dark:data-[focus]:to-purple-900/20 data-[focus]:outline-none",
+                        "group flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 data-[focus]:bg-gradient-to-r data-[focus]:from-blue-50 data-[focus]:to-purple-50 dark:data-[focus]:from-blue-900/20 dark:data-[focus]:to-purple-900/20 data-[focus]:outline rounded-md",
                         item.name === "Logout"
                           ? "text-red-600 dark:text-red-400 data-[focus]:text-red-700 dark:data-[focus]:text-red-300"
                           : "text-gray-700 dark:text-gray-300 data-[focus]:text-gray-900 dark:data-[focus]:text-white"
