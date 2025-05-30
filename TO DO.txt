@@ -1,0 +1,87 @@
+####################################################
+#                                                  #
+#                     TO-DO                        #
+#                                                  #
+####################################################
+
+🔒 SYSTÈME UTILISATEUR
+-----------------------
+- Supprimer l’ancienne photo de profil (PDP) lors d’un changement.
+- Modifier l’entity `User` pour inclure :
+    • `followers` : liste de `user_id`
+    • `following` : liste de `user_id`
+    • Infos personnelles affichées dans la page paramètres
+
+📝 SYSTÈME DE PUBLICATIONS
+---------------------------
+- Créer une entity `Publication` avec :
+    • `authorID` : ID de l’auteur (`user_id`)
+    • `likes` : liste de `user_id`
+    • `commentairesID` : liste de `postID`
+- Sauvegarder dans une table `Publication` :
+    • `postID`, `authorID`, `likes`, `commentairesID`
+
+💬 SYSTÈME DE MESSAGES PRIVÉS
+------------------------------
+- Réfléchir à la structure du système de messagerie privée (MP)
+
+
+
+####################################################
+#                                                  #
+#               Interface modèle                   #
+#                                                  #
+####################################################
+
+
+
+📱 INTERFACE UTILISATEUR - MOBILE
+---------------------------------
+
+🔸 **Page d’accueil (au lancement)** :
+    • Barre de recherche : {posts, comptes, thèmes...}
+    • Catégories : {For You, Top, Médias, Amis} + 🔴 si nouveau contenu
+    • Corps des publications :
+        → Voir le template post ci-dessous
+    • Menu : {Accueil, Messages, Créer un post, Compte/Paramètres} + 🔴 si notif
+
+🔸 **Page de recherche** :
+    • Flèche de retour + terme recherché
+    • Filtres : {Posts, Comptes, Mentions, Autres}
+    • Corps des résultats :
+        → Voir le template résultats ci-dessous
+
+🔸 **Page de messagerie** :
+    • Filtres/groupes : {Tous, MP, Groupes, Perso}
+    • Corps des discussions
+    • Menu commun (comme sur la page d’accueil)
+
+🔸 **Page du compte personnel** :
+    • PDP + pseudo
+    • Bouton paramètres en haut à droite
+    • Bio + nombre d’abonnés / abonnements
+    • Corps des publications du compte
+    • Menu commun
+
+💻 INTERFACE UTILISATEUR - PC
+------------------------------
+- Disposition similaire à la version mobile ?
+- Option : deux colonnes de posts côte à côte
+    → Ex. : For You + Friends ou Top + Médias
+
+💡 IDÉES DE FONCTIONNALITÉS
+-----------------------------
+- Ajouter une fonction pour “épingler” les posts (style “enregistrer” sur Insta)
+
+📄 TEMPLATE DE POST
+--------------------
+- PDP + Pseudo
+- Titre
+- (En gris : #XXXXXXXXX → ID ou horodatage ?)
+- Contenu du post :
+    • Texte, photos, vidéos, audio
+- Interactions :
+    • 👍 Like
+    • 💬 Répondre (texte simple ou sous-forme de post réponse ?)
+    • ✉️ Envoyer (option d’ajouter un message)
+    • 🚫 Signaler / Ne plus recommander dans For You
