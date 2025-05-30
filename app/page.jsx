@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import React from "react";
 
@@ -55,10 +57,20 @@ export default function Home() {
 
         {/* Call to action buttons */}
         <section className="flex justify-center gap-6 pt-4">
-          <button className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">
+          <button
+            onClick={() => {
+              window.location.href = "login";
+            }}
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+          >
             Se connecter
           </button>
-          <button className="px-6 py-3 bg-transparent border border-blue-600 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-50 dark:hover:bg-gray-800 transition">
+          <button
+            onClick={() => {
+              window.location.href = "register";
+            }}
+            className="px-6 py-3 bg-transparent border border-blue-600 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-50 dark:hover:bg-gray-800 transition"
+          >
             S'inscrire
           </button>
         </section>
