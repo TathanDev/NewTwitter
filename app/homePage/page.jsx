@@ -9,7 +9,7 @@ export default function GetHomePage() {
         <Post />
       </div>
 
-      <div className="fixed bottom-4 left-4 right-4">
+      <div className="fixed bottom-0 left-4 right-4">
         <SearchBar></SearchBar>
       </div>
     </div>
