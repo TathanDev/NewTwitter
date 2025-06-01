@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+
 // Composants d'icônes SVG personnalisés
 const Heart = ({ className, ...props }) => (
   <svg
@@ -74,6 +75,46 @@ const Bookmark = ({ className, ...props }) => (
   </svg>
 );
 
+const MapPin = ({ className, ...props }) => (
+  <svg
+    className={className}
+    {...props}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+    />
+  </svg>
+);
+
+// Nouvelle icône "..." (trois points)
+const MoreHorizontal = ({ className, ...props }) => (
+  <svg
+    className={className}
+    {...props}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+    <circle cx="19" cy="12" r="1.5" fill="currentColor" />
+    <circle cx="5" cy="12" r="1.5" fill="currentColor" />
+  </svg>
+);
+
 export default function Post({
   author = "Marie Dubois",
   username = "@marie_dubois",
@@ -82,11 +123,14 @@ export default function Post({
   likesCount = 42,
   commentsCount = 8,
   sharesCount = 3,
+  localisation = "Paris",
   avatar = "/api/placeholder/40/40",
 }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [localLikesCount, setLocalLikesCount] = useState(likesCount);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -106,6 +150,29 @@ export default function Post({
     console.log(isSaved ? "Post retiré des favoris" : "Post sauvegardé");
   };
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleMenuOption = (optionNumber) => {
+    console.log(`Option ${optionNumber} sélectionnée`);
+    setIsMenuOpen(false);
+  };
+
+  // Fermer le menu quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-colors duration-300">
       {/* En-tête du post */}
@@ -123,6 +190,41 @@ export default function Post({
               <span>•</span>
               <span>{timeAgo}</span>
             </div>
+          </div>
+          {/* Menu déroulant */}
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={toggleMenu}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+            >
+              <MoreHorizontal className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            </button>
+
+            {/* Menu déroulant */}
+            {isMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-10">
+                <div className="py-1">
+                  <button
+                    onClick={() => handleMenuOption(1)}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"
+                  >
+                    Voir le profile
+                  </button>
+                  <button
+                    onClick={() => handleMenuOption(2)}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"
+                  >
+                    Ne plus recommander
+                  </button>
+                  <button
+                    onClick={() => handleMenuOption(3)}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"
+                  >
+                    Reporter
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -143,8 +245,16 @@ export default function Post({
         </div>
       </div>
 
+      {/* localisation */}
+      <div className="px-6 py-2">
+        <div className="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
+          <MapPin className="w-4 h-4 mr-2" />
+          <span>{localisation}</span>
+        </div>
+      </div>
+
       {/* Boutons d'action */}
-      <div className="px-6 py-4 ">
+      <div className="px-6 py-4">
         <div className="flex items-center justify-around">
           {/* Bouton Like */}
           <button
@@ -187,7 +297,6 @@ export default function Post({
             }`}
           >
             <Bookmark className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
-            <span className="font-medium"></span>
           </button>
         </div>
       </div>
