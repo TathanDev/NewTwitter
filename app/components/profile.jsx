@@ -6,13 +6,32 @@ export default function ProfileForm({ user }) {
   const [username, setUsername] = useState(user.pseudo_user);
   const [about, setAbout] = useState(user.description_user);
   const [pdp, setPdp] = useState(user.pfp_user);
-  let pdp_url = user.pfp_user;
+  let pdp_url = "";
 
   async function handleSubmit(e) {
     e.preventDefault();
-    let pdp_url = user.pfp_user;
+    pdp_url = user.pfp_user;
 
     if (pdp && pdp instanceof File) {
+      // Supprimer l'ancienne photo de profil si elle existe
+      if (user.pfp_user) {
+        try {
+          await fetch("/api/upload", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: user.pfp_user,
+            }),
+          });
+        } catch (error) {
+          console.error(
+            "Erreur lors de la suppression de l'ancienne photo:",
+            error
+          );
+        }
+      }
+
+      // Uploader la nouvelle photo
       const formData = new FormData();
       formData.append("pdp", pdp);
       const res = await fetch("/api/upload", {

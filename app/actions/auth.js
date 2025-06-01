@@ -30,7 +30,6 @@ export async function login(formData) {
 
     const valide = bcrypt.compare(formData.get("password"), user.password_user);
     if (valide) {
-      console.log(user);
       await createSession(user.id_user);
     }
   } catch (error) {

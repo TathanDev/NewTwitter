@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { logout } from "../actions/auth";
 import { verifySession } from "@/utils/dal";
 import {
   Disclosure,
@@ -14,21 +15,21 @@ import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 const navigation = [];
 
 const profile = [];
-var pfp =
-  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80";
+var pfp = "";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
 export default async function NavBar() {
+  pfp = "http://scriptum.odysseyus.fr/elements/img/user-icon-dark.png";
   const session = await verifySession();
   profile.length = 0;
 
   if (session) {
     profile.push({ name: "Profile", href: "profile", current: false });
     profile.push({ name: "Settings", href: "settings", current: false });
-    profile.push({ name: "Logout", href: "/logout", current: false });
+    profile.push({ name: "Logout", href: "", current: false });
 
     const response = await fetch(
       `http://localhost:3000/api/user/${session.userId}`
@@ -146,11 +147,12 @@ export default async function NavBar() {
                     <a
                       href={item.href}
                       className={classNames(
-                        "group flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 data-[focus]:bg-gradient-to-r data-[focus]:from-blue-50 data-[focus]:to-purple-50 dark:data-[focus]:from-blue-900/20 dark:data-[focus]:to-purple-900/20 data-[focus]:outline rounded-md",
+                        "group flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 data-[focus]:bg-gradient-to-r data-[focus]:from-blue-50 data-[focus]:to-purple-50 dark:data-[focus]:from-blue-900/20 dark:data-[focus]:to-purple-900/20 data-[focus]:outline rounded-sm",
                         item.name === "Logout"
                           ? "text-red-600 dark:text-red-400 data-[focus]:text-red-700 dark:data-[focus]:text-red-300"
                           : "text-gray-700 dark:text-gray-300 data-[focus]:text-gray-900 dark:data-[focus]:text-white"
                       )}
+                      onClick={item.name === "Logout" ? logout : undefined}
                     >
                       <span className="flex-1">{item.name}</span>
                       {item.name === "Profile" && (
