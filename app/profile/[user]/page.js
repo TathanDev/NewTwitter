@@ -60,7 +60,6 @@ export default async function ProfilePage({ params }) {
               <stop offset="100%" stopColor="#EC4899" />
             </linearGradient>
             <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#EC4899" />
               <stop offset="50%" stopColor="#8B5CF6" />
               <stop offset="100%" stopColor="#3B82F6" />
             </linearGradient>
@@ -71,13 +70,11 @@ export default async function ProfilePage({ params }) {
       <div className="max-w-4xl mx-auto relative z-10 space-y-8">
         {/* Header avec retour */}
         <div className="flex items-center gap-4 mb-8">
-          <button className="group p-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-2xl shadow-lg border border-gray-300/50 dark:border-gray-600/30 hover:shadow-xl transition-all duration-300">
-            <span className="text-xl group-hover:-translate-x-1 transition-transform duration-300">
-              ←
-            </span>
-          </button>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400">
+              <a href="http://localhost:3000" className="cursor-pointer">
+                ⥃{" "}
+              </a>
               Profil utilisateur
             </h1>
           </div>
@@ -93,21 +90,13 @@ export default async function ProfilePage({ params }) {
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
               {/* Avatar */}
               <div className="relative">
-                {userData.pfp_user ? (
-                  <img
-                    src={userData.pfp_user}
-                    alt={`Photo de profil de ${userData.pseudo_user}`}
-                    className="w-32 h-32 rounded-full object-cover shadow-2xl border-4 border-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400"
-                  />
-                ) : (
-                  <div className="w-32 h-32 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400 rounded-full flex items-center justify-center shadow-2xl">
-                    <span className="text-4xl font-bold text-white">
-                      {userData.pseudo_user?.charAt(0)?.toUpperCase() || "?"}
-                    </span>
-                  </div>
-                )}
+                <img
+                  src={userData.pfp_user}
+                  alt={`Photo de profil de ${userData.pseudo_user}`}
+                  className="w-32 h-32 rounded-full shadow-2xl from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400"
+                />
                 {/* Indicateur en ligne */}
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 dark:bg-green-400 rounded-full border-4 border-white dark:border-gray-800 flex items-center justify-center">
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 dark:bg-green-400 rounded-full flex items-center justify-center">
                   <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
                 </div>
               </div>
@@ -183,42 +172,6 @@ export default async function ProfilePage({ params }) {
                 <span>⚙️</span>
                 <span>Plus</span>
               </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Section des dernières activités */}
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/80 dark:to-gray-700/80 p-6 rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-600/30 backdrop-blur-sm">
-          <h3 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-            Activité récente
-          </h3>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-xl">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm">📝</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  A publié un nouveau post
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Il y a 2 heures
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-xl">
-              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm">❤️</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  A aimé 3 publications
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Il y a 1 jour
-                </p>
-              </div>
             </div>
           </div>
         </div>
