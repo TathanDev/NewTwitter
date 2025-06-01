@@ -152,7 +152,7 @@ export default function SearchBar() {
               />
             </svg>
             <span className="group-hover:translate-x-0.5 transition-transform duration-300 hidden sm:inline">
-              →
+              ⟶
             </span>
           </button>
         </div>
