@@ -1,6 +1,5 @@
 "use server";
 
-import User from "@/entities/User";
 import Post from "@/entities/Post";
 import { redirect } from "next/navigation";
 

@@ -1,10 +1,11 @@
 "use client";
-import Post from "../components/post";
+import PostComponent from "../components/post";
 import SearchBar from "../components/searchBar";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function GetHomePage() {
   const scrollRef = useRef(null);
+  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
     const handleWheel = (e) => {
@@ -16,9 +17,16 @@ export default function GetHomePage() {
     window.addEventListener("wheel", handleWheel, { passive: false });
     return () => window.removeEventListener("wheel", handleWheel);
   }, []);
+
+  useEffect(() => {
+    fetch("/api/getPosts")
+      .then((res) => res.json())
+      .then((data) => setPosts(data));
+  }, []);
+
   return (
     <div>
-      <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
+      <div className="flex flex-col justify-center min-h-screen space-y-4">
         {/* Formes décoratives d'arrière-plan */}
         <div className="absolute inset-0 pointer-events-none">
           {/* Bulles flottantes */}
@@ -67,11 +75,11 @@ export default function GetHomePage() {
         <div
           ref={scrollRef}
           tabIndex={0}
-          className="overflow-y-scroll h-[100vh] px-4 py-9 space-y-4 hide-scrollbar"
+          className="overflow-y-scroll h-[100vh] py-9 space-y-4 hide-scrollbar"
         >
-          <Post />
-          <Post />
-          <Post />
+          {posts.map((post) => (
+            <PostComponent key={post.id} post={post} />
+          ))}
         </div>
       </div>
 
