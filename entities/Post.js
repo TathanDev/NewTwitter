@@ -23,6 +23,23 @@ const Post = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    time: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    likes: {
+      type: DataTypes.JSON,
+      allowNull: false,
+    },
+    share_count: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: false,
+    },
+    comments: {
+      type: DataTypes.JSON,
+      allowNull: false,
+    },
   },
   {
     tableName: "Posts",

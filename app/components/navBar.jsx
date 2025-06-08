@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { logout } from "../actions/auth";
 import { verifySession } from "@/utils/dal";
 import {
   Disclosure,
@@ -9,26 +10,32 @@ import {
   MenuItem,
   MenuItems,
 } from "@headlessui/react";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3Icon,
+  BellIcon,
+  XMarkIcon,
+  ChatBubbleBottomCenterTextIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
 
-const navigation = [{ name: "Home", href: "/", current: true }];
+const navigation = [];
 
 const profile = [];
-var pfp =
-  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80";
+var pfp = "";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
 export default async function NavBar() {
+  pfp = "http://scriptum.odysseyus.fr/elements/img/user-icon-dark.png";
   const session = await verifySession();
   profile.length = 0;
 
   if (session) {
     profile.push({ name: "Profile", href: "profile", current: false });
     profile.push({ name: "Settings", href: "settings", current: false });
-    profile.push({ name: "Logout", href: "/logout", current: false });
+    profile.push({ name: "Logout", href: "", current: false });
 
     const response = await fetch(
       `http://localhost:3000/api/user/${session.userId}`
@@ -43,107 +50,199 @@ export default async function NavBar() {
   }
 
   return (
-    <Disclosure as="nav" className="bg-gray-800">
-      <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="relative flex h-16 items-center justify-between">
-          <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-            {/* Mobile menu button*/}
-            <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-              <span className="absolute -inset-0.5" />
-              <span className="sr-only">Open main menu</span>
-              <Bars3Icon
-                aria-hidden="true"
-                className="block size-6 group-data-[open]:hidden"
-              />
-              <XMarkIcon
-                aria-hidden="true"
-                className="hidden size-6 group-data-[open]:block"
-              />
-            </DisclosureButton>
-          </div>
-          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-            <div className="flex shrink-0 items-center">
-              <img alt="NewT" src="../favicon.ico" className="h-8 w-auto" />
-            </div>
-            <div className="hidden sm:ml-6 sm:block">
-              <div className="flex space-x-4">
-                {navigation.map((item) => (
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    aria-current={item.current ? "page" : undefined}
-                    className={classNames(
-                      item.current
-                        ? "bg-gray-900 text-white"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                      "rounded-md px-3 py-2 text-sm font-medium"
-                    )}
-                  >
-                    {item.name}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-            <button
-              type="button"
-              className="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-            >
-              <span className="absolute -inset-1.5" />
-              <span className="sr-only">View notifications</span>
-              <BellIcon aria-hidden="true" className="size-6" />
-            </button>
+    <div>
+      <Disclosure
+        as="nav"
+        className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors duration-300"
+      >
+        {/* Effet de halo subtil en arrière-plan */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 dark:from-blue-400/10 dark:via-purple-400/10 dark:to-pink-400/10"></div>
 
-            {/* Profile dropdown */}
-            <Menu as="div" className="relative ml-3">
-              <div>
-                <MenuButton className="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                  <span className="absolute -inset-1.5" />
-                  <span className="sr-only">Open user menu</span>
-                  <img alt="" src={pfp} className="size-8 rounded-full" />
-                </MenuButton>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="relative flex h-16 items-center justify-between">
+            {/* Mobile menu button */}
+            <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+              <DisclosureButton className="group relative inline-flex items-center justify-center rounded-xl p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-200">
+                <span className="absolute -inset-0.5" />
+                <span className="sr-only">Open main menu</span>
+                <Bars3Icon
+                  aria-hidden="true"
+                  className="block size-6 group-data-[open]:hidden"
+                />
+                <XMarkIcon
+                  aria-hidden="true"
+                  className="hidden size-6 group-data-[open]:block"
+                />
+              </DisclosureButton>
+            </div>
+
+            {/* Logo et Navigation */}
+            <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+              {/* Logo NewT avec effet moderne */}
+              <div className="flex shrink-0 items-center">
+                <div className="relative">
+                  <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 dark:from-blue-400/30 dark:via-purple-400/30 dark:to-pink-400/30 rounded-2xl blur-lg"></div>
+                  <a
+                    href="http://localhost:3000/"
+                    className="relative text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 tracking-tight"
+                  >
+                    NewT
+                  </a>
+                </div>
               </div>
-              <MenuItems
-                transition
-                className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-              >
-                {profile.map((item) => (
-                  <MenuItem key={item.name}>
+
+              {/* Navigation Links */}
+              <div className="hidden sm:ml-8 sm:block">
+                <div className="flex space-x-2">
+                  {navigation.map((item) => (
                     <a
+                      key={item.name}
                       href={item.href}
-                      className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:outline-none"
+                      aria-current={item.current ? "page" : undefined}
+                      className={classNames(
+                        item.current
+                          ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white",
+                        "rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 hover:shadow-md"
+                      )}
                     >
                       {item.name}
                     </a>
-                  </MenuItem>
-                ))}
-              </MenuItems>
-            </Menu>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Actions à droite */}
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0 space-x-3">
+              {/* Post */}
+              <a
+                href="newPost"
+                className="relative rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all duration-200 hover:shadow-md group"
+              >
+                <span className="absolute -inset-1.5" />
+                <span className="sr-only">Poster</span>
+                <PlusIcon
+                  aria-hidden="true"
+                  className="size-5 group-hover:scale-110 transition-transform duration-200"
+                />
+              </a>
+              {/* Notifications */}
+              <a
+                type="button"
+                className="relative rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all duration-200 hover:shadow-md group"
+              >
+                <span className="absolute -inset-1.5" />
+                <span className="sr-only">View notifications</span>
+                <BellIcon
+                  aria-hidden="true"
+                  className="size-5 group-hover:scale-110 transition-transform duration-200"
+                />
+
+                {/* Badge de notification (optionnel) */}
+                <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-pink-500 to-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
+              </a>
+
+              {/* Message */}
+              <a
+                type="button"
+                className="relative rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all duration-200 hover:shadow-md group"
+              >
+                <span className="absolute -inset-1.5" />
+                <span className="sr-only">View notifications</span>
+                <ChatBubbleBottomCenterTextIcon
+                  aria-hidden="true"
+                  className="size-5 group-hover:scale-110 transition-transform duration-200"
+                />
+              </a>
+
+              {/* Profile dropdown */}
+              <Menu as="div" className="relative">
+                <div>
+                  <MenuButton className="relative flex rounded-xl bg-gray-100 dark:bg-gray-800 p-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 hover:shadow-md transition-all duration-200 group">
+                    <span className="absolute -inset-1.5" />
+                    <span className="sr-only">Open user menu</span>
+                    <img
+                      alt=""
+                      src={pfp}
+                      className="size-8 rounded-lg group-hover:scale-110 transition-transform duration-200 object-cover"
+                    />
+                  </MenuButton>
+                </div>
+
+                <MenuItems
+                  transition
+                  className="absolute right-0 z-10 mt-3 w-56 origin-top-right rounded-2xl bg-white dark:bg-gray-800 py-2 shadow-xl ring-1 ring-gray-200 dark:ring-gray-700 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in border border-gray-100 dark:border-gray-700"
+                >
+                  {profile.map((item, index) => (
+                    <MenuItem key={item.name}>
+                      <a
+                        href={item.href}
+                        className={classNames(
+                          "group flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 data-[focus]:bg-gradient-to-r data-[focus]:from-blue-50 data-[focus]:to-purple-50 dark:data-[focus]:from-blue-900/20 dark:data-[focus]:to-purple-900/20 data-[focus]:outline rounded-sm",
+                          item.name === "Logout"
+                            ? "text-red-600 dark:text-red-400 data-[focus]:text-red-700 dark:data-[focus]:text-red-300"
+                            : "text-gray-700 dark:text-gray-300 data-[focus]:text-gray-900 dark:data-[focus]:text-white"
+                        )}
+                        onClick={item.name === "Logout" ? logout : undefined}
+                      >
+                        <span className="flex-1">{item.name}</span>
+                        {item.name === "Profile" && (
+                          <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
+                            👤
+                          </span>
+                        )}
+                        {item.name === "Settings" && (
+                          <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
+                            ⚙️
+                          </span>
+                        )}
+                        {item.name === "Login" && (
+                          <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
+                            🔑
+                          </span>
+                        )}
+                        {item.name === "Register" && (
+                          <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
+                            ✨
+                          </span>
+                        )}
+                        {item.name === "Logout" && (
+                          <span className="text-red-400 group-data-[focus]:text-red-500">
+                            🚪
+                          </span>
+                        )}
+                      </a>
+                    </MenuItem>
+                  ))}
+                </MenuItems>
+              </Menu>
+            </div>
           </div>
         </div>
-      </div>
 
-      <DisclosurePanel className="sm:hidden">
-        <div className="space-y-1 px-2 pb-3 pt-2">
-          {navigation.map((item) => (
-            <DisclosureButton
-              key={item.name}
-              as="a"
-              href={item.href}
-              aria-current={item.current ? "page" : undefined}
-              className={classNames(
-                item.current
-                  ? "bg-gray-900 text-white"
-                  : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                "block rounded-md px-3 py-2 text-base font-medium"
-              )}
-            >
-              {item.name}
-            </DisclosureButton>
-          ))}
-        </div>
-      </DisclosurePanel>
-    </Disclosure>
+        {/* Mobile menu panel */}
+        <DisclosurePanel className="sm:hidden border-t border-gray-200/50 dark:border-gray-700/50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg">
+          <div className="space-y-2 px-4 pb-4 pt-4">
+            {navigation.map((item) => (
+              <DisclosureButton
+                key={item.name}
+                as="a"
+                href={item.href}
+                aria-current={item.current ? "page" : undefined}
+                className={classNames(
+                  item.current
+                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white",
+                  "block rounded-xl px-4 py-3 text-base font-medium transition-all duration-200 hover:shadow-md"
+                )}
+              >
+                {item.name}
+              </DisclosureButton>
+            ))}
+          </div>
+        </DisclosurePanel>
+      </Disclosure>
+    </div>
   );
 }

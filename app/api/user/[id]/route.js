@@ -1,16 +1,24 @@
 import User from "@/entities/User";
+import { Sequelize } from "sequelize";
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
-  const slug = (await params).id; // 'a', 'b', or 'c'
+  const slug = (await params).id.toLowerCase(); // On force la casse ici
 
-  let user = await User.findOne({ where: { id_user: slug } });
-  if (user == null) {
-    user = await User.findOne({ where: { pseudo_user: slug } });
-    if (user == null) {
-      return NextResponse.json({ error: "User not found" });
+  let user = await User.findOne({
+    where: Sequelize.where(
+      Sequelize.fn("lower", Sequelize.col("pseudo_user")),
+      slug
+    ),
+  });
+
+  if (!user) {
+    user = await User.findOne({ where: { id_user: slug } });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
   }
+
   return NextResponse.json(user);
 }
 
