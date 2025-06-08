@@ -11,17 +11,14 @@ const Post = sequelize.define(
     },
     author: {
       type: DataTypes.STRING(255),
-      allowNull: false,
-      unique: true,
     },
     text: {
       type: DataTypes.STRING(255),
       allowNull: false,
-      unique: true,
     },
     media: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     time: {
       type: DataTypes.STRING(255),
@@ -29,6 +26,7 @@ const Post = sequelize.define(
     },
     likes: {
       type: DataTypes.JSON,
+      defaultValue: 0,
       allowNull: false,
     },
     share_count: {
@@ -38,6 +36,7 @@ const Post = sequelize.define(
     },
     comments: {
       type: DataTypes.JSON,
+      defaultValue: [],
       allowNull: false,
     },
   },

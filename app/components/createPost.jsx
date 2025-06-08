@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { createPost } from "@/app/actions/post";
 import {
   Heart,
   MessageCircle,
@@ -12,7 +13,7 @@ import {
   Send,
 } from "lucide-react";
 
-const CreatePostPage = () => {
+export default function CreatePostPage({ user }) {
   const [postContent, setPostContent] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
@@ -22,8 +23,8 @@ const CreatePostPage = () => {
 
   // Données de l'utilisateur simulées
   const currentUser = {
-    name: "Vous",
-    username: "@votre_pseudo",
+    name: user.pseudo_user,
+    username: user.pseudo_user,
     avatar: "V",
   };
 
@@ -68,10 +69,25 @@ const CreatePostPage = () => {
     setFileType("");
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (postContent.trim() || selectedFile) {
-      alert("Post créé avec succès !");
-      // Ici, vous ajouteriez la logique pour envoyer le post au serveur
+      let link = { url: "" };
+      if (selectedFile) {
+        const res = await fetch("/api/postMedia", {
+          method: "POST",
+          body: selectedFile,
+          headers: {
+            "x-filename": selectedFile.name,
+          },
+        });
+        link = await res.json();
+      }
+      let data = {
+        pseudo: user.pseudo_user,
+        text: postContent,
+        media: link.url || "",
+      };
+      createPost(data);
       setPostContent("");
       setSelectedFile(null);
       setFilePreview(null);
@@ -345,6 +361,4 @@ const CreatePostPage = () => {
       </div>
     </main>
   );
-};
-
-export default CreatePostPage;
+}

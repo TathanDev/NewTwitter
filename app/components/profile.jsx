@@ -16,7 +16,7 @@ export default function ProfileForm({ user }) {
       // Supprimer l'ancienne photo de profil si elle existe
       if (user.pfp_user) {
         try {
-          await fetch("/api/upload", {
+          await fetch("/api/pdpHandler", {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -34,7 +34,7 @@ export default function ProfileForm({ user }) {
       // Uploader la nouvelle photo
       const formData = new FormData();
       formData.append("pdp", pdp);
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/pdpHandler", {
         method: "POST",
         body: formData,
       });
