@@ -22,7 +22,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className="hide-scrollbar">
       <script src="//unpkg.com/react-scan/dist/auto.global.js" async></script>
       <body
         className={
@@ -31,7 +31,9 @@ export default function RootLayout({ children }) {
         }
       >
         <ThemeProvider>
-          <NavBar />
+          <div className="fixed top-0 left-0 right-0 z-50">
+            <NavBar />
+          </div>
           {children}
         </ThemeProvider>
       </body>

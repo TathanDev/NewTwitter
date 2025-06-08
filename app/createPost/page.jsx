@@ -1,5 +1,5 @@
 import { verifySession } from "@/utils/dal";
-import Post from "../components/post";
+import CreatePostPage from "../components/createPost";
 
 export default async function ProfilePage() {
   const session = await verifySession();
@@ -12,5 +12,5 @@ export default async function ProfilePage() {
   }
   let data = await fetch("http://localhost:3000/api/user/" + session.userId);
   let user = await data.json();
-  return <Post user={user} />;
+  return <CreatePostPage user={user} />;
 }
