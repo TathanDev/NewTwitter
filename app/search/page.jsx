@@ -156,6 +156,7 @@ export default function SearchResultsPage() {
               <>
                 {results.users && results.users.length > 0 && (
                   <ResultSection
+                    query={query}
                     title="Utilisateurs"
                     items={results.users}
                     type="user"
@@ -163,6 +164,7 @@ export default function SearchResultsPage() {
                 )}
                 {results.posts && results.posts.length > 0 && (
                   <ResultSection
+                    query={query}
                     title="Posts"
                     items={results.posts}
                     type="post"
@@ -174,6 +176,7 @@ export default function SearchResultsPage() {
             {/* Résultats spécifiques */}
             {type === "users" && results.users && (
               <ResultSection
+                query={query}
                 title="Utilisateurs"
                 items={results.users}
                 type="user"
@@ -183,6 +186,7 @@ export default function SearchResultsPage() {
 
             {type === "posts" && results.posts && (
               <ResultSection
+                query={query}
                 title="Posts"
                 items={results.posts}
                 type="post"
@@ -192,6 +196,7 @@ export default function SearchResultsPage() {
 
             {type === "hashtags" && results.posts && (
               <ResultSection
+                query={query}
                 title={`Posts avec ${results.hashtag || `#${query}`}`}
                 items={results.posts}
                 type="post"
@@ -256,11 +261,11 @@ function FilterButton({ active, onClick, children }) {
 }
 
 // Composant pour afficher une section de résultats
-function ResultSection({ title, items, type, showAll = false }) {
+function ResultSection({ query, title, items, type, showAll = false }) {
   const displayItems = showAll ? items : items.slice(0, 3);
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 overflow-y-scroll hide-scrollbar max-h-200">
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
         {type === "user" ? "👥" : "📝"} {title}
         <span className="text-sm font-normal text-gray-500 dark:text-gray-400">

@@ -44,6 +44,7 @@ export async function updateProfile() {
 }
 
 export async function logout() {
+  console.log("Déconnexion de l'utilisateur");
   deleteSession();
   redirect("/");
 }
