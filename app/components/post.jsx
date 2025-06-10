@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 
 const Heart = ({ className, ...props }) => (
@@ -171,7 +172,6 @@ export default function PostComponent({ post }) {
 
         // Récupérer les données utilisateur
         const userData = await getUser(post.author);
-        console.log("Données utilisateur récupérées:", userData);
         setAuthor(userData);
 
         // Initialiser le nombre de likes
