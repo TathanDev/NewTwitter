@@ -8,18 +8,6 @@ const nextConfig = {
         port: "",
         pathname: "/**",
       },
-      {
-        protocol: "http",
-        hostname: "",
-        port: "",
-        pathname: "/public/memes/*",
-      },
-      {
-        protocol: "https",
-        hostname: "",
-        port: "3000",
-        pathname: "/public/memes/*",
-      },
     ],
   },
   eslint: {

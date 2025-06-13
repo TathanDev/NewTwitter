@@ -30,7 +30,6 @@ export async function login(formData) {
 
     const valide = bcrypt.compare(formData.get("password"), user.password_user);
     if (valide) {
-      console.log(user);
       await createSession(user.id_user);
     }
   } catch (error) {
@@ -45,6 +44,7 @@ export async function updateProfile() {
 }
 
 export async function logout() {
+  console.log("Déconnexion de l'utilisateur");
   deleteSession();
   redirect("/");
 }

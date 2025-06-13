@@ -1,8 +1,6 @@
 "use client";
+import React, { useState, useEffect } from "react";
 
-import React, { useState, useRef, useEffect } from "react";
-
-// Composants d'icônes SVG personnalisés
 const Heart = ({ className, ...props }) => (
   <svg
     className={className}
@@ -75,157 +73,204 @@ const Bookmark = ({ className, ...props }) => (
   </svg>
 );
 
-const MapPin = ({ className, ...props }) => (
-  <svg
-    className={className}
-    {...props}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-    />
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-    />
-  </svg>
-);
+// Fonction utilitaire pour formater la date
+const formatTimeAgo = (dateString) => {
+  const now = new Date();
+  const postDate = new Date(dateString);
+  const diffInSeconds = Math.floor((now - postDate) / 1000);
 
-// Nouvelle icône "..." (trois points)
-const MoreHorizontal = ({ className, ...props }) => (
-  <svg
-    className={className}
-    {...props}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-    <circle cx="19" cy="12" r="1.5" fill="currentColor" />
-    <circle cx="5" cy="12" r="1.5" fill="currentColor" />
-  </svg>
-);
+  if (diffInSeconds < 60) {
+    return "à l'instant";
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `il y a ${minutes}min`;
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `il y a ${hours}h`;
+  } else if (diffInSeconds < 2592000) {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `il y a ${days}j`;
+  } else {
+    return postDate.toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "short",
+    });
+  }
+};
 
-export default function Post({
-  author = "Marie Dubois",
-  username = "@marie_dubois",
-  timeAgo = "il y a 2h",
-  content = "Magnifique coucher de soleil aujourd'hui ! 🌅 Parfois il faut s'arrêter et apprécier les petits moments de bonheur que la vie nous offre. #nature #sunset #gratitude",
-  likesCount = 42,
-  commentsCount = 8,
-  sharesCount = 3,
-  localisation = "Paris",
-  avatar = "/api/placeholder/40/40",
-}) {
+// Fonction simulée pour récupérer les données utilisateur
+const getUser = async (pseudo) => {
+  try {
+    if (!pseudo) {
+      throw new Error("Pseudo manquant");
+    }
+
+    const response = await fetch(`http://localhost:3000/api/user/${pseudo}`);
+
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
+    }
+
+    const userData = await response.json();
+    return userData;
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'utilisateur:", error);
+    throw error;
+  }
+};
+
+// Fonction utilitaire pour générer un nom d'utilisateur depuis l'auteur
+const generateUsername = (author) => {
+  if (!author) return "@utilisateur";
+  let pseudo = author.pseudo_user || author.id_user || "utilisateur";
+  return `@${pseudo.toLowerCase().replace(/\s+/g, "_")}`;
+};
+
+// Fonction utilitaire pour calculer le nombre de likes
+const getLikesCount = (likes) => {
+  if (typeof likes === "number") return likes;
+  if (Array.isArray(likes)) return likes.length;
+  if (typeof likes === "object" && likes !== null) {
+    return Object.keys(likes).length;
+  }
+  return 0;
+};
+
+// Fonction utilitaire pour calculer le nombre de commentaires
+const getCommentsCount = (comments) => {
+  if (Array.isArray(comments)) return comments.length;
+  if (typeof comments === "number") return comments;
+  return 0;
+};
+
+export default function PostComponent({ post }) {
+  // États pour gérer les données utilisateur
+  const [author, setAuthor] = useState(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [userError, setUserError] = useState(null);
+
+  // États locaux pour les interactions
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [localLikesCount, setLocalLikesCount] = useState(likesCount);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef(null);
+  const [localLikesCount, setLocalLikesCount] = useState(0);
+
+  // Vérification que le post existe
+  if (!post) {
+    return (
+      <div className="max-w-2xl mx-auto bg-red-50 border border-red-200 rounded-2xl p-6">
+        <p className="text-red-600">Erreur : Aucun post fourni</p>
+      </div>
+    );
+  }
+
+  // Effect pour charger les données utilisateur
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        setIsLoadingUser(true);
+        setUserError(null);
+
+        // Récupérer les données utilisateur
+        const userData = await getUser(post.author);
+        setAuthor(userData);
+
+        // Initialiser le nombre de likes
+        setLocalLikesCount(getLikesCount(post.likes));
+      } catch (error) {
+        setUserError("Impossible de charger les données utilisateur");
+
+        // Fallback avec des données par défaut
+        setAuthor({
+          id_user: post.author || "unknown",
+          pseudo_user: post.author || "utilisateur",
+          user_pseudo: "Utilisateur inconnu",
+          pfp_user:
+            "https://ui-avatars.com/api/?name=User&background=random&color=fff&size=64",
+        });
+      } finally {
+        setIsLoadingUser(false);
+      }
+    };
+
+    loadUser();
+  }, [post.author, post.likes]);
+
+  // Extraction des données du post
+  const username = generateUsername(author);
+  const timeAgo = formatTimeAgo(post.time);
+  const content = post.text || "";
+  const commentsCount = getCommentsCount(post.comments);
+  const sharesCount = post.share_count || 0;
+  const mediaUrl = post.media;
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLocalLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+    console.log(`${isLiked ? "Unlike" : "Like"} post ${post.post_id}`);
   };
 
   const handleComment = () => {
-    console.log("Ouvrir les commentaires");
+    console.log(`Ouvrir les commentaires pour le post ${post.post_id}`);
   };
 
   const handleShare = () => {
-    console.log("Partager le post");
+    console.log(`Partager le post ${post.post_id}`);
   };
 
   const handleSave = () => {
     setIsSaved(!isSaved);
-    console.log(isSaved ? "Post retiré des favoris" : "Post sauvegardé");
+    console.log(
+      `${isSaved ? "Retirer des favoris" : "Sauvegarder"} le post ${
+        post.post_id
+      }`
+    );
   };
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const handleMenuOption = (optionNumber) => {
-    console.log(`Option ${optionNumber} sélectionnée`);
-    setIsMenuOpen(false);
-  };
-
-  // Fermer le menu quand on clique ailleurs
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   return (
-    <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-colors duration-300">
+    <div className="max-w-2xl px-4 mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-colors duration-300">
       {/* En-tête du post */}
       <div className="p-6 pb-4">
         <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-            {author.charAt(0)}
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-              {author}
-            </h3>
-            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-              <span>{username}</span>
-              <span>•</span>
-              <span>{timeAgo}</span>
-            </div>
-          </div>
-          {/* Menu déroulant */}
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={toggleMenu}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
-            >
-              <MoreHorizontal className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-            </button>
-
-            {/* Menu déroulant */}
-            {isMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg z-10">
-                <div className="py-1">
-                  <button
-                    onClick={() => handleMenuOption(1)}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"
-                  >
-                    Voir le profile
-                  </button>
-                  <button
-                    onClick={() => handleMenuOption(2)}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"
-                  >
-                    Ne plus recommander
-                  </button>
-                  <button
-                    onClick={() => handleMenuOption(3)}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200"
-                  >
-                    Reporter
-                  </button>
+          {isLoadingUser ? (
+            // Skeleton loading pour l'avatar et les informations
+            <>
+              <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+              <div className="flex-1">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-32"></div>
+              </div>
+            </>
+          ) : (
+            <>
+              <img
+                src={author.pfp_user}
+                alt="Profil utilisateur"
+                className="relative size-16 rounded-full bg-gray-50 dark:bg-gray-800"
+                onError={(e) => {
+                  e.target.src =
+                    "https://ui-avatars.com/api/?name=User&background=random&color=fff&size=64";
+                }}
+              />
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                  {author.pseudo_user}
+                </h3>
+                <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                  <span>{username}</span>
+                  <span>•</span>
+                  <span>{timeAgo}</span>
+                  {userError && (
+                    <>
+                      <span>•</span>
+                      <span className="text-red-500 text-xs">
+                        Erreur de chargement
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -236,25 +281,38 @@ export default function Post({
         </p>
       </div>
 
-      {/* Image du post (optionnelle) */}
-      <div className="px-6 pb-4">
-        <div className="w-full h-64 bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
-          <span className="text-white text-lg font-medium">
-            Image du coucher de soleil
-          </span>
+      {/* Média du post (si présent) */}
+      {mediaUrl && (
+        <div className="px-6 pb-4">
+          <div className="w-full rounded-xl overflow-hidden">
+            {mediaUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+              <img
+                src={mediaUrl}
+                alt="Média du post"
+                className="w-full h-64 object-cover"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  e.target.nextSibling.style.display = "flex";
+                }}
+              />
+            ) : (
+              <video
+                src={mediaUrl}
+                className="w-full h-64 object-cover"
+                controls
+              />
+            )}
+            <div className="w-full h-64 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 rounded-xl items-center justify-center hidden">
+              <span className="text-gray-600 dark:text-gray-300 text-lg font-medium">
+                Erreur de chargement du média
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* localisation */}
-      <div className="px-6 py-2">
-        <div className="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400">
-          <MapPin className="w-4 h-4 mr-2" />
-          <span>{localisation}</span>
-        </div>
-      </div>
+      )}
 
       {/* Boutons d'action */}
-      <div className="px-6 py-4">
+      <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
         <div className="flex items-center justify-around">
           {/* Bouton Like */}
           <button
