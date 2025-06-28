@@ -57,7 +57,7 @@ export default function GetHomePage({ postsList, user }) {
         >
           {postsList.map((post) => (
             <PostComponent
-              key={post.id}
+              key={post.post_id}
               post={post}
             />
           ))}
