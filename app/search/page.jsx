@@ -354,17 +354,3 @@ function UserResultCard({ user }) {
     </Link>
   );
 }
-
-// Fonction utilitaire pour obtenir le label du type de recherche
-function getTypeLabel(type) {
-  switch (type) {
-    case "users":
-      return "les utilisateurs";
-    case "posts":
-      return "les posts";
-    case "hashtags":
-      return "les hashtags";
-    default:
-      return "tout le contenu";
-  }
-}

@@ -2,7 +2,8 @@ import 'server-only'
  
 import { cookies } from 'next/headers'
 import { decrypt } from '@/utils/session'
-import {cache} from 'react';
+import { cache } from 'react'
+import User from '@/entities/User'
 
 export const verifySession = cache(async () => {
   const cookie = (await cookies()).get('session')?.value
@@ -20,7 +21,7 @@ export const getUser = cache(async () => {
     if (!session) return null
    
     try {
-      const user = await Project.findByPk(session.userId);
+      const user = await User.findByPk(session.userId);
    
       return user
     } catch (error) {
