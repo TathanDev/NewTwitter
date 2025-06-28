@@ -32,6 +32,22 @@ const User = sequelize.define(
       defaultValue:
         "http://scriptum.odysseyus.fr/elements/img/user-icon-dark.png",
     },
+    // Nouveaux champs optionnels pour les paramètres utilisateur
+    email_settings: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      validate: {
+        isEmail: true,
+      },
+    },
+    birth_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    country: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
   },
   {
     tableName: "Users",
