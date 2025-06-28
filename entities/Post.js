@@ -46,3 +46,39 @@ const Post = sequelize.define(
 );
 
 export default Post;
+
+export const postService = {
+  async addLike(postId, userId) {
+    const post = await Post.findByPk(postId);
+    if (!post) throw new Error("Post non trouvé");
+
+    if (!post.likes.includes(userId)) {
+      post.likes = [...post.likes, userId];
+      await post.save();
+    }
+    return post;
+  },
+
+  async removeLike(postId, userId) {
+    const post = await Post.findByPk(postId);
+    if (!post) throw new Error("Post non trouvé");
+
+    post.likes = post.likes.filter((id) => id !== userId);
+    await post.save();
+    return post;
+  },
+
+  async hasUserLiked(postId, userId) {
+    const post = await Post.findByPk(postId);
+    return post ? post.likes.includes(userId) : false;
+  },
+
+  async getPostsWithLikesCount() {
+    return await Post.findAll({
+      attributes: [
+        "*",
+        [sequelize.fn("JSON_LENGTH", sequelize.col("likes")), "likes_count"],
+      ],
+    });
+  },
+};

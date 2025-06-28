@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useUser } from '../context/UserContext';
 
 const Heart = ({ className, ...props }) => (
   <svg
@@ -119,6 +120,30 @@ const getUser = async (pseudo) => {
   }
 };
 
+// Fonction pour gérer les likes
+const toggleLike = async (postId, userId, isCurrentlyLiked) => {
+  try {
+    const method = isCurrentlyLiked ? "DELETE" : "POST";
+    const response = await fetch(`/api/posts/${postId}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId }),
+    });
+    console.log(response);
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Erreur lors de la gestion du like:", error);
+    throw error;
+  }
+};
+
 // Fonction utilitaire pour générer un nom d'utilisateur depuis l'auteur
 const generateUsername = (author) => {
   if (!author) return "@utilisateur";
@@ -136,6 +161,17 @@ const getLikesCount = (likes) => {
   return 0;
 };
 
+// Fonction utilitaire pour vérifier si l'utilisateur a liké
+const checkIfUserLiked = (likes, userId) => {
+  if (Array.isArray(likes)) {
+    return likes.includes(userId);
+  }
+  if (typeof likes === "object" && likes !== null) {
+    return Object.keys(likes).includes(userId);
+  }
+  return false;
+};
+
 // Fonction utilitaire pour calculer le nombre de commentaires
 const getCommentsCount = (comments) => {
   if (Array.isArray(comments)) return comments.length;
@@ -144,6 +180,10 @@ const getCommentsCount = (comments) => {
 };
 
 export default function PostComponent({ post }) {
+  // Récupérer l'utilisateur connecté depuis le contexte
+  const { currentUser } = useUser();
+  const currentUserId = currentUser?.id_user;
+  
   // États pour gérer les données utilisateur
   const [author, setAuthor] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
@@ -153,6 +193,7 @@ export default function PostComponent({ post }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [localLikesCount, setLocalLikesCount] = useState(0);
+  const [isLikeLoading, setIsLikeLoading] = useState(false);
 
   // Vérification que le post existe
   if (!post) {
@@ -163,7 +204,7 @@ export default function PostComponent({ post }) {
     );
   }
 
-  // Effect pour charger les données utilisateur
+  // Effect pour charger les données utilisateur et initialiser les states
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -174,8 +215,14 @@ export default function PostComponent({ post }) {
         const userData = await getUser(post.author);
         setAuthor(userData);
 
-        // Initialiser le nombre de likes
-        setLocalLikesCount(getLikesCount(post.likes));
+        // Initialiser le nombre de likes et le statut liked
+        const likesCount = getLikesCount(post.likes);
+        const userHasLiked = currentUserId
+          ? checkIfUserLiked(post.likes, currentUserId)
+          : false;
+
+        setLocalLikesCount(likesCount);
+        setIsLiked(userHasLiked);
       } catch (error) {
         setUserError("Impossible de charger les données utilisateur");
 
@@ -187,13 +234,19 @@ export default function PostComponent({ post }) {
           pfp_user:
             "https://ui-avatars.com/api/?name=User&background=random&color=fff&size=64",
         });
+
+        // Initialiser les likes même en cas d'erreur
+        setLocalLikesCount(getLikesCount(post.likes));
+        setIsLiked(
+          currentUserId ? checkIfUserLiked(post.likes, currentUserId) : false
+        );
       } finally {
         setIsLoadingUser(false);
       }
     };
 
     loadUser();
-  }, [post.author, post.likes]);
+  }, [post.author, post.likes, currentUserId]);
 
   // Extraction des données du post
   const username = generateUsername(author);
@@ -203,10 +256,46 @@ export default function PostComponent({ post }) {
   const sharesCount = post.share_count || 0;
   const mediaUrl = post.media;
 
-  const handleLike = () => {
+  const handleLike = async () => {
+    // Vérifier si l'utilisateur est connecté
+    if (!currentUserId) {
+      console.warn("Utilisateur non connecté - impossible de liker");
+      // Vous pouvez ici déclencher une modal de connexion ou rediriger
+      return;
+    }
+
+    // Éviter les doubles clics
+    if (isLikeLoading) return;
+
+    // Optimistic update
+    const previousLiked = isLiked;
+    const previousCount = localLikesCount;
+
     setIsLiked(!isLiked);
     setLocalLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
-    console.log(`${isLiked ? "Unlike" : "Like"} post ${post.post_id}`);
+    setIsLikeLoading(true);
+
+    try {
+      const result = await toggleLike(post.post_id, currentUserId, isLiked);
+
+      // Mettre à jour avec la réponse du serveur
+      setLocalLikesCount(result.likesCount);
+      setIsLiked(result.hasLiked);
+
+      console.log(
+        `${result.hasLiked ? "Liked" : "Unliked"} post ${post.post_id}`
+      );
+    } catch (error) {
+      // Rollback en cas d'erreur
+      setIsLiked(previousLiked);
+      setLocalLikesCount(previousCount);
+      console.error("Erreur lors du like:", error);
+
+      // Vous pouvez ici afficher une notification d'erreur
+      // showErrorNotification("Impossible de liker ce post");
+    } finally {
+      setIsLikeLoading(false);
+    }
   };
 
   const handleComment = () => {
@@ -317,13 +406,21 @@ export default function PostComponent({ post }) {
           {/* Bouton Like */}
           <button
             onClick={handleLike}
+            disabled={isLikeLoading}
             className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
               isLiked
                 ? "text-red-500 bg-red-50 dark:bg-red-900/20"
                 : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            }`}
+            } ${
+              isLikeLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+            } ${!currentUserId ? "opacity-50" : ""}`}
+            title={!currentUserId ? "Connectez-vous pour liker" : ""}
           >
-            <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+            <Heart
+              className={`w-5 h-5 ${isLiked ? "fill-current" : ""} ${
+                isLikeLoading ? "animate-pulse" : ""
+              }`}
+            />
             <span className="font-medium">{localLikesCount}</span>
           </button>
 

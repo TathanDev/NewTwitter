@@ -1,29 +1,8 @@
 "use client";
 import PostComponent from "../components/post";
 import SearchBar from "../components/searchBar";
-import { useEffect, useRef, useState } from "react";
 
-export default function GetHomePage() {
-  const scrollRef = useRef(null);
-  const [posts, setPosts] = useState([]);
-
-  useEffect(() => {
-    const handleWheel = (e) => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTop += e.deltaY;
-        e.preventDefault();
-      }
-    };
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => window.removeEventListener("wheel", handleWheel);
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/getPosts")
-      .then((res) => res.json())
-      .then((data) => setPosts(data));
-  }, []);
-
+export default function GetHomePage({ postsList, user }) {
   return (
     <div>
       <div className="flex flex-col justify-center min-h-screen space-y-4">
@@ -73,12 +52,14 @@ export default function GetHomePage() {
           </svg>
         </div>
         <div
-          ref={scrollRef}
           tabIndex={0}
           className="overflow-y-scroll h-[100vh] py-9 space-y-4 hide-scrollbar"
         >
-          {posts.map((post) => (
-            <PostComponent key={post.id} post={post} />
+          {postsList.map((post) => (
+            <PostComponent
+              key={post.id}
+              post={post}
+            />
           ))}
         </div>
       </div>

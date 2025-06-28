@@ -3,7 +3,7 @@ import { Sequelize } from "sequelize";
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
-  const slug = (await params).id.toLowerCase(); // On force la casse ici
+  const slug = (await params).id.toLowerCase();
 
   let user = await User.findOne({
     where: Sequelize.where(
