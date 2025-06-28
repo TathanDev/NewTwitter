@@ -32,11 +32,11 @@ export default async function RootLayout({ children }) {
     }
   } catch (error) {
     // Pas d'utilisateur connecté ou erreur, initialUser reste null
-    console.log('No user session found');
+    console.log("No user session found");
   }
 
   return (
-    <html lang="en" className="hide-scrollbar">
+    <html lang="en" className="hide-scrollbar" suppressHydrationWarning={true}>
       <script
         dangerouslySetInnerHTML={{
           __html: `
