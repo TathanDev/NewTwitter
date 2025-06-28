@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "@/utils/sequelize";
+import { commentService } from "./Comment";
 
 const Post = sequelize.define(
   "UsPosters",
@@ -74,11 +75,44 @@ export const postService = {
   },
 
   async getPostsWithLikesCount() {
-    return await Post.findAll({
+    const posts = await Post.findAll({
       attributes: [
         "*",
         [sequelize.fn("JSON_LENGTH", sequelize.col("likes")), "likes_count"],
       ],
     });
+    
+    // Ajouter le nombre réel de commentaires pour chaque post
+    const postsWithComments = await Promise.all(
+      posts.map(async (post) => {
+        const commentsCount = await commentService.getCommentsCount(post.post_id);
+        return {
+          ...post.toJSON(),
+          comments_count: commentsCount
+        };
+      })
+    );
+    
+    return postsWithComments;
+  },
+
+  async getPostWithComments(postId) {
+    const post = await Post.findByPk(postId, {
+      attributes: [
+        "*",
+        [sequelize.fn("JSON_LENGTH", sequelize.col("likes")), "likes_count"],
+      ],
+    });
+    
+    if (!post) throw new Error("Post non trouvé");
+    
+    const comments = await commentService.getCommentsByPostId(postId);
+    const commentsCount = await commentService.getCommentsCount(postId);
+    
+    return {
+      ...post.toJSON(),
+      comments: comments,
+      comments_count: commentsCount
+    };
   },
 };

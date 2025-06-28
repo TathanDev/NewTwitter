@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifySession, getUser } from "@/utils/dal";
 import Post from "@/entities/Post";
+import Comment from "@/entities/Comment";
 
 export async function DELETE(request, { params }) {
   try {
@@ -51,7 +52,12 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    // Supprimer le post
+    // Supprimer d'abord tous les commentaires liés au post
+    await Comment.destroy({
+      where: { post_id: post_id },
+    });
+
+    // Puis supprimer le post
     await Post.destroy({
       where: { post_id: post_id },
     });
