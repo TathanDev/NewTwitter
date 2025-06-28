@@ -57,6 +57,24 @@ const Share = ({ className, ...props }) => (
   </svg>
 );
 
+const Trash = ({ className, ...props }) => (
+  <svg
+    className={className}
+    {...props}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+    />
+  </svg>
+);
+
 const Bookmark = ({ className, ...props }) => (
   <svg
     className={className}
@@ -373,6 +391,48 @@ export default function PostComponent({ post, isDetailView = false }) {
     );
   };
 
+  const handleDelete = async (e) => {
+    // Empêcher la propagation pour éviter la redirection
+    e.stopPropagation();
+    
+    // Vérifier si l'utilisateur est connecté et est l'auteur
+    if (!currentUserId || !author || author.id_user !== currentUserId) {
+      console.warn("Non autorisé à supprimer ce post");
+      return;
+    }
+
+    // Demander confirmation
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce post ?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/posts/${post.post_id}/delete`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: currentUserId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Post supprimé avec succès", result);
+      
+      // Rediriger vers la page d'accueil après suppression
+      router.push("/");
+    } catch (error) {
+      console.error("Erreur lors de la suppression du post:", error);
+      alert("Erreur lors de la suppression du post. Veuillez réessayer.");
+    }
+  };
+
+  // Vérifier si l'utilisateur peut supprimer ce post
+  const canDeletePost = currentUserId && author && author.id_user === currentUserId;
+
   const handlePostClick = (e) => {
     // Ne pas naviguer si on clique sur un bouton ou un lien
     if (e.target.closest('button') || e.target.closest('a')) {
@@ -541,6 +601,17 @@ export default function PostComponent({ post, isDetailView = false }) {
           >
             <Bookmark className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
           </button>
+
+          {/* Bouton Delete - visible seulement pour l'auteur */}
+          {canDeletePost && (
+            <button
+              onClick={handleDelete}
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
+              title="Supprimer ce post"
+            >
+              <Trash className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
       </div>
