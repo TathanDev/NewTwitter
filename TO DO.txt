@@ -1,12 +1,21 @@
 ####################################################
 #                                                  #
+#                   BUG A FIX                      #
+#                                                  #
+####################################################
+
+🏗️ BUG QUAND ON BUILD
+----------------------
+ - useSearchParams should be wrapped [...]
+
+####################################################
+#                                                  #
 #                     TO-DO                        #
 #                                                  #
 ####################################################
 
 🔒 SYSTÈME UTILISATEUR
 -----------------------
-- Supprimer l’ancienne photo de profil (PDP) lors d’un changement.
 - Modifier l’entity `User` pour inclure :
     • `followers` : liste de `user_id`
     • `following` : liste de `user_id`
@@ -14,12 +23,7 @@
 
 📝 SYSTÈME DE PUBLICATIONS
 ---------------------------
-- Créer une entity `Publication` avec :
-    • `authorID` : ID de l’auteur (`user_id`)
-    • `likes` : liste de `user_id`
-    • `commentairesID` : liste de `postID`
-- Sauvegarder dans une table `Publication` :
-    • `postID`, `authorID`, `likes`, `commentairesID`
+ - 
 
 💬 SYSTÈME DE MESSAGES PRIVÉS
 ------------------------------
