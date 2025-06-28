@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useUser } from '../context/UserContext';
 
 const Heart = ({ className, ...props }) => (
@@ -179,10 +180,11 @@ const getCommentsCount = (comments) => {
   return 0;
 };
 
-export default function PostComponent({ post }) {
+export default function PostComponent({ post, isDetailView = false }) {
   // Récupérer l'utilisateur connecté depuis le contexte
   const { currentUser } = useUser();
   const currentUserId = currentUser?.id_user;
+  const router = useRouter();
   
   // États pour gérer les données utilisateur
   const [author, setAuthor] = useState(null);
@@ -194,6 +196,7 @@ export default function PostComponent({ post }) {
   const [isSaved, setIsSaved] = useState(false);
   const [localLikesCount, setLocalLikesCount] = useState(0);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const [showCopyNotification, setShowCopyNotification] = useState(false);
 
   // Vérification que le post existe
   if (!post) {
@@ -256,7 +259,10 @@ export default function PostComponent({ post }) {
   const sharesCount = post.share_count || 0;
   const mediaUrl = post.media;
 
-  const handleLike = async () => {
+  const handleLike = async (e) => {
+    // Empêcher la propagation pour éviter la redirection
+    e.stopPropagation();
+    
     // Vérifier si l'utilisateur est connecté
     if (!currentUserId) {
       console.warn("Utilisateur non connecté - impossible de liker");
@@ -298,15 +304,71 @@ export default function PostComponent({ post }) {
     }
   };
 
-  const handleComment = () => {
-    console.log(`Ouvrir les commentaires pour le post ${post.post_id}`);
+  const handleComment = (e) => {
+    // Empêcher la propagation pour éviter la redirection
+    e.stopPropagation();
+    
+    // Si on n'est pas sur la page détail, naviguer vers la page du post
+    if (!isDetailView) {
+      router.push(`/post/${post.post_id}`);
+    } else {
+      // Sinon, scroll vers la section commentaires (future implémentation)
+      console.log("Scroll vers les commentaires");
+    }
   };
 
-  const handleShare = () => {
-    console.log(`Partager le post ${post.post_id}`);
+  const handleShare = async (e) => {
+    // Empêcher la propagation pour éviter la redirection
+    e.stopPropagation();
+    
+    const postUrl = `${window.location.origin}/post/${post.post_id}`;
+    
+    try {
+      // Tenter d'utiliser l'API Web Share si disponible
+      if (navigator.share && navigator.canShare) {
+        await navigator.share({
+          title: `Post de ${author?.pseudo_user || 'Utilisateur'}`,
+          text: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+          url: postUrl
+        });
+      } else {
+        // Fallback : copier dans le presse-papiers
+        await navigator.clipboard.writeText(postUrl);
+        
+        // Afficher la notification de succès
+        triggerCopyNotification();
+      }
+    } catch (error) {
+      console.error('Erreur lors du partage:', error);
+      
+      // Fallback ultime : sélectionner le texte pour copie manuelle
+      const textArea = document.createElement('textarea');
+      textArea.value = postUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        // Afficher la notification même en cas de fallback
+        triggerCopyNotification();
+      } catch (fallbackError) {
+        console.error('Impossible de copier le lien', fallbackError);
+      }
+      document.body.removeChild(textArea);
+    }
   };
 
-  const handleSave = () => {
+  // Fonction pour afficher la notification de copie
+  const triggerCopyNotification = () => {
+    setShowCopyNotification(true);
+    setTimeout(() => {
+      setShowCopyNotification(false);
+    }, 3000); // Masquer après 3 secondes
+  };
+
+  const handleSave = (e) => {
+    // Empêcher la propagation pour éviter la redirection
+    e.stopPropagation();
+    
     setIsSaved(!isSaved);
     console.log(
       `${isSaved ? "Retirer des favoris" : "Sauvegarder"} le post ${
@@ -315,8 +377,38 @@ export default function PostComponent({ post }) {
     );
   };
 
+  const handlePostClick = (e) => {
+    // Ne pas naviguer si on clique sur un bouton ou un lien
+    if (e.target.closest('button') || e.target.closest('a')) {
+      return;
+    }
+    
+    // Ne pas naviguer si on est déjà sur la page de détail
+    if (isDetailView) {
+      return;
+    }
+    
+    router.push(`/post/${post.post_id}`);
+  };
+
   return (
-    <div className="max-w-2xl px-4 mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-colors duration-300">
+    <div className="relative">
+      {/* Notification de copie */}
+      {showCopyNotification && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span className="font-medium">Lien copié dans le presse-papiers !</span>
+        </div>
+      )}
+      
+      <div 
+        className={`max-w-2xl px-4 mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-colors duration-300 ${
+          !isDetailView ? 'cursor-pointer' : ''
+        }`}
+        onClick={handlePostClick}
+      >
       {/* En-tête du post */}
       <div className="p-6 pb-4">
         <div className="flex items-center space-x-3">
@@ -454,6 +546,7 @@ export default function PostComponent({ post }) {
             <Bookmark className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} />
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
