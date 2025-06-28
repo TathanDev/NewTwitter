@@ -308,13 +308,9 @@ export default function PostComponent({ post, isDetailView = false }) {
     // Empêcher la propagation pour éviter la redirection
     e.stopPropagation();
     
-    // Si on n'est pas sur la page détail, naviguer vers la page du post
-    if (!isDetailView) {
-      router.push(`/post/${post.post_id}`);
-    } else {
-      // Sinon, scroll vers la section commentaires (future implémentation)
-      console.log("Scroll vers les commentaires");
-    }
+    // Pour le moment, ne rien faire (future implémentation des commentaires)
+    console.log("Commenter le post", post.post_id);
+    // TODO: Ouvrir une modal de commentaire ou scroll vers la section commentaires
   };
 
   const handleShare = async (e) => {

@@ -5,24 +5,64 @@ import { createContext, useContext, useEffect, useState } from "react";
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState("light");
+  // Initialiser avec le thème actuel si possible
+  const [theme, setTheme] = useState(() => {
+    // Côté client, vérifier immédiatement le thème
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem("theme");
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light";
+      const currentTheme = savedTheme || systemTheme;
+      
+      // Vérifier si le thème est déjà appliqué dans le DOM
+      const isDarkApplied = document.documentElement.classList.contains('dark');
+      const shouldBeDark = currentTheme === 'dark';
+      
+      // Seulement ajuster si nécessaire
+      if (isDarkApplied !== shouldBeDark) {
+        if (shouldBeDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+      
+      return currentTheme;
+    }
+    return "light"; // Fallback pour le SSR
+  });
 
   useEffect(() => {
+    // Ce useEffect ne s'exécute que si le thème change vraiment
     const savedTheme = localStorage.getItem("theme");
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
       .matches
       ? "dark"
       : "light";
 
-    setTheme(savedTheme || systemTheme);
+    const correctTheme = savedTheme || systemTheme;
+    
+    // Seulement mettre à jour si différent
+    if (correctTheme !== theme) {
+      setTheme(correctTheme);
+    }
   }, []);
 
   useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
+    // Vérifier si le changement est réellement nécessaire
+    const isDarkApplied = document.documentElement.classList.contains('dark');
+    const shouldBeDark = theme === "dark";
+    
+    if (isDarkApplied !== shouldBeDark) {
+      if (shouldBeDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
     }
+    
     localStorage.setItem("theme", theme);
   }, [theme]);
 
