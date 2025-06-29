@@ -140,7 +140,7 @@ const getUser = async (pseudo) => {
 };
 
 // Fonction pour gérer les likes
-const toggleLike = async (postId, userId, isCurrentlyLiked) => {
+const toggleLike = async (postId, userId, isCurrentlyLiked, setLoading) => {
   try {
     const method = isCurrentlyLiked ? "DELETE" : "POST";
     const response = await fetch(`/api/posts/${postId}`, {
@@ -150,15 +150,16 @@ const toggleLike = async (postId, userId, isCurrentlyLiked) => {
       },
       body: JSON.stringify({ userId }),
     });
-    console.log(response);
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Erreur HTTP: ${response.status}`, errorText);
       throw new Error(`Erreur HTTP: ${response.status}`);
     }
 
     const result = await response.json();
     return result;
   } catch (error) {
-    console.error("Erreur lors de la gestion du like:", error);
+console.error("Erreur lors de la gestion du like:", error);
     throw error;
   }
 };
@@ -203,6 +204,8 @@ export default function PostComponent({
   onCommentsCountChange,
   externalCommentsCount,
 }) {
+
+  const [loading, setLoading] = useState(false);
   // Récupérer l'utilisateur connecté depuis le contexte
   const { currentUser } = useUser();
   const currentUserId = currentUser?.id_user;
@@ -242,19 +245,18 @@ export default function PostComponent({
         setAuthor(userData);
 
         // Initialiser le nombre de likes et le statut liked
-        const likesCount = getLikesCount(post.likes);
-        const userHasLiked = currentUserId
-          ? checkIfUserLiked(post.likes, currentUserId)
-          : false;
+        const likesArray = Array.isArray(post.likes) ? post.likes : [];
+        const likesCount = likesArray.length;
+        const userHasLiked = currentUserId ? likesArray.includes(currentUserId) : false;
 
         setLocalLikesCount(likesCount);
         setIsLiked(userHasLiked);
 
-        // Utiliser le compteur externe s'il est fourni
+        // Utiliser le compteur externe s'il est fourni, sinon utiliser celui du post
         const commentsCountValue =
           externalCommentsCount !== undefined
             ? externalCommentsCount
-            : getCommentsCount(post.comments_count);
+            : (post.comments_count || 0);
         setLocalCommentsCount(commentsCountValue);
       } catch (error) {
         setUserError("Impossible de charger les données utilisateur");
@@ -269,10 +271,9 @@ export default function PostComponent({
         });
 
         // Initialiser les likes même en cas d'erreur
-        setLocalLikesCount(getLikesCount(post.likes));
-        setIsLiked(
-          currentUserId ? checkIfUserLiked(post.likes, currentUserId) : false
-        );
+        const likesArray = Array.isArray(post.likes) ? post.likes : [];
+        setLocalLikesCount(likesArray.length);
+        setIsLiked(currentUserId ? likesArray.includes(currentUserId) : false);
       } finally {
         setIsLoadingUser(false);
       }

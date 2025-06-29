@@ -1,23 +1,13 @@
 import { NextResponse } from "next/server";
 import { postController } from "../../../actions/postController";
+import { postService } from "@/entities/Post";
 
 export async function GET(request, { params }) {
   try {
     const { post_id } = await params;
     
-    // Récupérer tous les posts depuis votre source de données
-    const postsResponse = await fetch("http://localhost:3000/api/getPosts", {
-      cache: 'no-store'
-    });
-    
-    if (!postsResponse.ok) {
-      return NextResponse.json({ error: "Erreur lors de la récupération des posts" }, { status: 500 });
-    }
-    
-    const allPosts = await postsResponse.json();
-    
-    // Trouver le post spécifique par son ID
-    const post = allPosts.find(p => p.post_id == post_id);
+    // Récupérer le post directement depuis la base de données
+    const post = await postService.getPostWithComments(post_id);
     
     if (!post) {
       return NextResponse.json({ error: "Post non trouvé" }, { status: 404 });

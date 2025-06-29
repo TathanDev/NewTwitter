@@ -27,7 +27,7 @@ const Post = sequelize.define(
     },
     likes: {
       type: DataTypes.JSON,
-      defaultValue: 0,
+      defaultValue: [], // <- Important: Un tableau vide en valeur par défaut
       allowNull: false,
     },
     share_count: {
@@ -53,9 +53,19 @@ export const postService = {
     const post = await Post.findByPk(postId);
     if (!post) throw new Error("Post non trouvé");
 
-    if (!post.likes.includes(userId)) {
-      post.likes = [...post.likes, userId];
-      await post.save();
+    // Assure que le champ likes est toujours un tableau
+    let likesArray = Array.isArray(post.likes) ? post.likes : [];
+    if (!likesArray.includes(userId)) {
+      likesArray.push(userId);
+      
+      // Utiliser update direct pour forcer la mise à jour en base
+      await Post.update(
+        { likes: likesArray },
+        { where: { post_id: postId } }
+      );
+      
+      // Recharger l'instance
+      await post.reload();
     }
     return post;
   },
@@ -64,30 +74,48 @@ export const postService = {
     const post = await Post.findByPk(postId);
     if (!post) throw new Error("Post non trouvé");
 
-    post.likes = post.likes.filter((id) => id !== userId);
-    await post.save();
+    // Assure que le champ likes est toujours un tableau
+    let likesArray = Array.isArray(post.likes) ? post.likes : [];
+    likesArray = likesArray.filter((id) => id !== userId);
+    
+    // Utiliser update direct pour forcer la mise à jour en base
+    await Post.update(
+      { likes: likesArray },
+      { where: { post_id: postId } }
+    );
+    
+    // Recharger l'instance
+    await post.reload();
     return post;
   },
 
   async hasUserLiked(postId, userId) {
     const post = await Post.findByPk(postId);
-    return post ? post.likes.includes(userId) : false;
+    // Assure que le champ likes est toujours un tableau
+    return post ? (Array.isArray(post.likes) ? post.likes : []).includes(userId) : false;
   },
 
   async getPostsWithLikesCount() {
     const posts = await Post.findAll({
-      attributes: [
-        "*",
-        [sequelize.fn("JSON_LENGTH", sequelize.col("likes")), "likes_count"],
-      ],
+      order: [["post_id", "DESC"]], // Trier par ID décroissant (plus récents d'abord)
     });
     
-    // Ajouter le nombre réel de commentaires pour chaque post
+    // Ajouter le nombre réel de likes et commentaires pour chaque post
     const postsWithComments = await Promise.all(
       posts.map(async (post) => {
+        const postData = post.toJSON();
+        
+        // S'assurer que likes est un tableau et calculer le nombre
+        const likesArray = Array.isArray(postData.likes) ? postData.likes : [];
+        const likesCount = likesArray.length;
+        
+        // Calculer le nombre réel de commentaires
         const commentsCount = await commentService.getCommentsCount(post.post_id);
+        
         return {
-          ...post.toJSON(),
+          ...postData,
+          likes: likesArray, // S'assurer que c'est un tableau
+          likes_count: likesCount,
           comments_count: commentsCount
         };
       })
@@ -97,20 +125,23 @@ export const postService = {
   },
 
   async getPostWithComments(postId) {
-    const post = await Post.findByPk(postId, {
-      attributes: [
-        "*",
-        [sequelize.fn("JSON_LENGTH", sequelize.col("likes")), "likes_count"],
-      ],
-    });
+    const post = await Post.findByPk(postId);
     
     if (!post) throw new Error("Post non trouvé");
+    
+    const postData = post.toJSON();
+    
+    // S'assurer que likes est un tableau et calculer le nombre
+    const likesArray = Array.isArray(postData.likes) ? postData.likes : [];
+    const likesCount = likesArray.length;
     
     const comments = await commentService.getCommentsByPostId(postId);
     const commentsCount = await commentService.getCommentsCount(postId);
     
     return {
-      ...post.toJSON(),
+      ...postData,
+      likes: likesArray, // S'assurer que c'est un tableau
+      likes_count: likesCount,
       comments: comments,
       comments_count: commentsCount
     };

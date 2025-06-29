@@ -82,21 +82,32 @@ export const commentService = {
   },
 
   async getCommentsByPostId(postId) {
-    return await Comment.findAll({
+    const comments = await Comment.findAll({
       where: { 
-        post_id: postId,
-        is_deleted: false 
+        post_id: postId
       },
       include: [
         {
           model: Comment,
           as: 'Replies',
-          where: { is_deleted: false },
           required: false,
+          include: [
+            {
+              model: Comment,
+              as: 'Replies',
+              required: false,
+            }
+          ]
         }
       ],
-      order: [['comment_id', 'ASC']]
+      order: [
+        ['comment_id', 'DESC'], // Plus récents d'abord
+        [{ model: Comment, as: 'Replies' }, 'comment_id', 'ASC']
+      ]
     });
+
+    // Organiser les commentaires de manière hiérarchique
+    return this.organizeCommentsHierarchy(comments);
   },
 
   async getCommentWithReplies(commentId) {
@@ -105,7 +116,6 @@ export const commentService = {
         {
           model: Comment,
           as: 'Replies',
-          where: { is_deleted: false },
           required: false,
         }
       ]
@@ -115,10 +125,10 @@ export const commentService = {
   async addLike(commentId, userId) {
     const comment = await Comment.findByPk(commentId);
     if (!comment) throw new Error("Commentaire non trouvé");
-    if (comment.is_deleted) throw new Error("Commentaire supprimé");
 
-    if (!comment.likes.includes(userId)) {
-      comment.likes = [...comment.likes, userId];
+    const likesArray = Array.isArray(comment.likes) ? comment.likes : [];
+    if (!likesArray.includes(userId)) {
+      comment.likes = [...likesArray, userId];
       await comment.save();
     }
     return comment;
@@ -128,7 +138,8 @@ export const commentService = {
     const comment = await Comment.findByPk(commentId);
     if (!comment) throw new Error("Commentaire non trouvé");
 
-    comment.likes = comment.likes.filter((id) => id !== userId);
+    const likesArray = Array.isArray(comment.likes) ? comment.likes : [];
+    comment.likes = likesArray.filter((id) => id !== userId);
     await comment.save();
     return comment;
   },
@@ -138,31 +149,90 @@ export const commentService = {
     return comment ? comment.likes.includes(userId) : false;
   },
 
-  async deleteComment(commentId, userId) {
+  async updateComment(commentId, userId, newText) {
     const comment = await Comment.findByPk(commentId);
     if (!comment) throw new Error("Commentaire non trouvé");
-    if (comment.is_deleted) throw new Error("Commentaire déjà supprimé");
 
     // Vérifier que l'utilisateur est l'auteur
-    // Note: ici on suppose que comment.author contient l'ID ou pseudo de l'utilisateur
     if (comment.author !== userId) {
-      throw new Error("Vous n'êtes pas autorisé à supprimer ce commentaire");
+      throw new Error("Vous n'êtes pas autorisé à modifier ce commentaire");
     }
 
-    // Marquer comme supprimé au lieu de supprimer complètement
-    comment.is_deleted = true;
-    comment.text = "[Commentaire supprimé]";
+    // Mettre à jour le texte
+    comment.text = newText.trim();
     await comment.save();
     
     return comment;
   },
 
+  async deleteComment(commentId, userId) {
+    const comment = await Comment.findByPk(commentId);
+    if (!comment) throw new Error("Commentaire non trouvé");
+
+    // Vérifier que l'utilisateur est l'auteur
+    if (comment.author !== userId) {
+      throw new Error("Vous n'êtes pas autorisé à supprimer ce commentaire");
+    }
+
+    // Supprimer d'abord toutes les réponses à ce commentaire
+    await Comment.destroy({
+      where: {
+        parent_comment_id: commentId
+      }
+    });
+
+    // Puis supprimer le commentaire lui-même
+    await comment.destroy();
+    
+    return { success: true };
+  },
+
   async getCommentsCount(postId) {
     return await Comment.count({
       where: { 
-        post_id: postId,
-        is_deleted: false 
+        post_id: postId
       }
     });
+  },
+
+  // Organise les commentaires en hiérarchie parent-enfant
+  organizeCommentsHierarchy(comments) {
+    const commentMap = new Map();
+    const topLevelComments = [];
+
+    // Première passe : créer la map de tous les commentaires
+    comments.forEach(comment => {
+      const commentData = comment.toJSON ? comment.toJSON() : comment;
+      commentData.Replies = commentData.Replies || [];
+      commentData.repliesCount = commentData.Replies.length;
+      commentMap.set(commentData.comment_id, commentData);
+    });
+
+    // Deuxième passe : organiser la hiérarchie
+    comments.forEach(comment => {
+      const commentData = commentMap.get(comment.comment_id);
+      if (!commentData.parent_comment_id) {
+        topLevelComments.push(commentData);
+      }
+    });
+
+    return topLevelComments;
+  },
+
+  // Méthode pour obtenir les statistiques détaillées
+  async getPostCommentsStats(postId) {
+    const totalCount = await this.getCommentsCount(postId);
+    const topLevelCount = await Comment.count({
+      where: { 
+        post_id: postId,
+        parent_comment_id: null
+      }
+    });
+    
+    return {
+      total: totalCount,
+      topLevel: topLevelCount,
+      replies: totalCount - topLevelCount
+    };
   }
 };

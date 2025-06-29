@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useUser } from '../context/UserContext';
-import CommentComponent from './comment';
+import AdvancedCommentComponent from './advancedComment';
 
 export default function CommentSection({ postId, onCommentsCountChange }) {
   const { currentUser } = useUser();
@@ -111,6 +111,11 @@ export default function CommentSection({ postId, onCommentsCountChange }) {
 
   const handleCommentDelete = (deletedCommentId) => {
     // Recharger les commentaires pour refléter la suppression
+    fetchComments();
+  };
+
+  const handleCommentEdit = (editedComment) => {
+    // Recharger les commentaires pour refléter les modifications
     fetchComments();
   };
 
@@ -235,11 +240,12 @@ export default function CommentSection({ postId, onCommentsCountChange }) {
         ) : (
           <div className="space-y-4">
             {comments.map((comment) => (
-              <CommentComponent
+              <AdvancedCommentComponent
                 key={comment.comment_id}
                 comment={comment}
                 onReply={handleCommentReply}
                 onDelete={handleCommentDelete}
+                onEdit={handleCommentEdit}
               />
             ))}
           </div>

@@ -61,6 +61,56 @@ export async function POST(request, { params }) {
   }
 }
 
+// Modifier un commentaire
+export async function PATCH(request, { params }) {
+  try {
+    const { comment_id } = await params;
+    const { userId, text } = await request.json();
+
+    // Vérifier que l'utilisateur est connecté
+    const session = await verifySession();
+    if (!session) {
+      return NextResponse.json(
+        { error: "Authentification requise" },
+        { status: 401 }
+      );
+    }
+
+    // Récupérer l'utilisateur connecté
+    const currentUser = await getUser();
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: "Utilisateur non trouvé" },
+        { status: 404 }
+      );
+    }
+
+    // Vérifier que l'utilisateur fourni correspond à l'utilisateur connecté
+    if (currentUser.id_user !== userId) {
+      return NextResponse.json(
+        { error: "ID utilisateur non valide" },
+        { status: 403 }
+      );
+    }
+
+    // Modifier le commentaire
+    const authorIdentifier = currentUser.pseudo_user || currentUser.id_user;
+    const updatedComment = await commentService.updateComment(comment_id, authorIdentifier, text);
+
+    return NextResponse.json({
+      success: true,
+      comment: updatedComment
+    });
+
+  } catch (error) {
+    console.error("Erreur lors de la modification du commentaire:", error);
+    return NextResponse.json(
+      { error: error.message || "Erreur serveur lors de la modification du commentaire" },
+      { status: 400 }
+    );
+  }
+}
+
 // Supprimer un commentaire
 export async function DELETE(request, { params }) {
   try {
