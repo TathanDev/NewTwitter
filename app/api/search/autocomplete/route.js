@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Op } from "sequelize";
 import Post from "@/entities/Post";
 import User from "@/entities/User";
+import Comment from "@/entities/Comment";
 
 export async function GET(request) {
   try {
@@ -38,6 +39,30 @@ export async function GET(request) {
         }))
       );
     }
+
+    if (type === "comments" || type === "all") {
+      const comments = await Comment.findAll({
+        where: {
+          is_deleted: false,
+          text: {
+            [Op.like]: `%${searchTerm}%`,
+          },
+        },
+        attributes: ["comment_id", "text"],
+        limit: 5,
+        order: [["time", "DESC"]],
+      });
+
+      suggestions.push(
+        ...comments.map((comment) => ({
+          type: "comment",
+          id: comment.comment_id,
+          label: comment.text,
+          value: comment.text,
+        }))
+      );
+    }
+
 
     if (type === "hashtags" || type === "all") {
       // Extraction simple des hashtags depuis les posts

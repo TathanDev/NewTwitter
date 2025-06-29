@@ -1,6 +1,8 @@
-import { verifySession } from "@/utils/dal";
+"use client";
+import { useState, useEffect } from "react";
 import PostComponent from "../../components/post";
 import BackButton from "../../components/BackButton";
+import CommentSection from "../../components/commentSection";
 import { notFound } from "next/navigation";
 
 async function getPost(postId) {
@@ -20,12 +22,48 @@ async function getPost(postId) {
   }
 }
 
-export default async function PostPage({ params }) {
-  const session = await verifySession();
-  const { id } = await params;
+export default function PostPage({ params }) {
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [localCommentsCount, setLocalCommentsCount] = useState(0);
   
-  // Récupérer le post
-  const post = await getPost(id);
+  useEffect(() => {
+    async function fetchPost() {
+      const { id } = await params;
+      const postData = await getPost(id);
+      
+      if (!postData) {
+        notFound();
+      }
+      
+      setPost(postData);
+      setLocalCommentsCount(postData.comments_count || 0);
+      setLoading(false);
+    }
+    
+    fetchPost();
+  }, [params]);
+  
+  const handleCommentsCountChange = (newCount) => {
+    setLocalCommentsCount(newCount);
+    // Mettre à jour le post local aussi
+    if (post) {
+      setPost(prev => ({ ...prev, comments_count: newCount }));
+    }
+  };
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <div className="max-w-4xl mx-auto py-8 px-4">
+          <div className="animate-pulse">
+            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded-xl mb-8"></div>
+            <div className="h-40 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   if (!post) {
     notFound();
@@ -41,42 +79,21 @@ export default async function PostPage({ params }) {
 
         {/* Post principal */}
         <div className="mb-8">
-          <PostComponent post={post} isDetailView={true} />
+          <PostComponent 
+            post={post} 
+            isDetailView={true} 
+            externalCommentsCount={localCommentsCount}
+          />
         </div>
 
-        {/* Section commentaires (préparée pour plus tard) */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-            Commentaires
-          </h2>
-          
-          {/* Placeholder pour les commentaires */}
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-            <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <p className="text-lg font-medium mb-2">Les commentaires arrivent bientôt!</p>
-            <p className="text-sm">Cette fonctionnalité sera implémentée prochainement.</p>
-          </div>
+        {/* Section commentaires */}
+        <div id="comments">
+          <CommentSection 
+            postId={post.post_id} 
+            onCommentsCountChange={handleCommentsCountChange}
+          />
         </div>
       </div>
     </div>
   );
-}
-
-// Métadonnées de la page
-export async function generateMetadata({ params }) {
-  const { id } = await params;
-  const post = await getPost(id);
-  
-  if (!post) {
-    return {
-      title: 'Post non trouvé - NewTwitter'
-    };
-  }
-
-  return {
-    title: `Post de ${post.author} - NewTwitter`,
-    description: post.text?.substring(0, 160) || 'Voir ce post sur NewTwitter',
-  };
 }
