@@ -62,7 +62,11 @@ export function useSearch() {
   // Fonction d'autocomplétion avec debounce
   const getSuggestions = useCallback(
     debounce(async (query, type = "all") => {
-      if (!query || query.trim().length < 1) {
+      console.log('useSearch: getSuggestions appelé avec:', { query, type });
+      
+      // Permettre les requêtes vides pour l'autocomplétion
+      if (query === null || query === undefined) {
+        console.log('useSearch: Query null/undefined, nettoyage des suggestions');
         setSuggestions([]);
         return;
       }
@@ -72,9 +76,14 @@ export function useSearch() {
           q: query.trim(),
           type,
         });
+        
+        const url = `/api/search/autocomplete?${params}`;
+        console.log('useSearch: Requête vers:', url);
 
-        const response = await fetch(`/api/search/autocomplete?${params}`);
+        const response = await fetch(url);
         const data = await response.json();
+        
+        console.log('useSearch: Réponse reçue:', data);
         setSuggestions(data.suggestions || []);
       } catch (err) {
         console.error("Erreur autocomplétion:", err);

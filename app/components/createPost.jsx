@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { createPost } from "@/app/actions/post";
+import MentionAutocomplete from './MentionAutocomplete';
+import { ParsedText } from '../utils/textParser';
 import {
   Heart,
   MessageCircle,
@@ -117,11 +119,11 @@ export default function CreatePostPage({ user }) {
         </div>
       </div>
 
-      {/* Contenu du post */}
+      {/* Contenu du post avec mentions et hashtags parsés */}
       {postContent && (
         <div className="px-6 pb-4">
           <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
-            {postContent}
+            <ParsedText text={postContent} />
           </p>
         </div>
       )}
@@ -240,13 +242,14 @@ export default function CreatePostPage({ user }) {
                 Contenu du post
               </h2>
 
-              {/* Zone de texte */}
-              <textarea
+              {/* Zone de texte avec auto-complétion */}
+              <MentionAutocomplete
                 value={postContent}
-                onChange={(e) => setPostContent(e.target.value)}
-                placeholder="Qu'avez-vous à partager aujourd'hui ?"
+                onChange={setPostContent}
+                placeholder="Qu'avez-vous à partager aujourd'hui ? Utilisez @ pour mentionner un utilisateur ou # pour un hashtag"
                 className="w-full h-32 p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-300"
                 maxLength={500}
+                rows={5}
               />
 
               <div className="flex justify-between items-center mt-2">

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from '../context/UserContext';
 import AdvancedCommentComponent from './advancedComment';
+import MentionAutocomplete from './MentionAutocomplete';
 
 export default function CommentSection({ postId, onCommentsCountChange }) {
   const { currentUser } = useUser();
@@ -142,15 +143,14 @@ export default function CommentSection({ postId, onCommentsCountChange }) {
               <div className="flex-1">
                 {showCommentForm ? (
                   <>
-                    <textarea
+                    <MentionAutocomplete
                       value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Écrivez votre commentaire..."
+                      onChange={setNewComment}
+                      placeholder="Écrivez votre commentaire... Utilisez @ pour mentionner un utilisateur ou # pour un hashtag"
                       className="w-full border border-transparent focus:border-blue-500 dark:focus:border-blue-500 rounded-2xl px-4 py-3 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-gray-600 resize-none transition-all duration-200"
                       rows={3}
                       maxLength={500}
                       disabled={isSubmitting}
-                      autoFocus
                     />
                     <div className="flex justify-between items-center mt-3">
                       <div className="flex items-center space-x-3">
