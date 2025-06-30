@@ -40,9 +40,11 @@ export default async function NavBar() {
     const response = await fetch(
       `http://localhost:3000/api/user/${session.userId}`
     );
-    if (response) {
+    if (response.ok) {
       const user = await response.json();
       pfp = user.pfp_user;
+    } else {
+      console.error(`Failed to fetch user: ${response.status} ${response.statusText}`);
     }
   } else {
     profile.push({ name: "Login", href: "login", current: false });

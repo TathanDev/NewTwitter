@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "../context/UserContext";
+import { useUser } from '../context/UserContext';
+import { ParsedText } from '../utils/textParser';
 
 const Heart = ({ className, ...props }) => (
   <svg
@@ -552,7 +553,7 @@ export default function PostComponent({
         {/* Contenu du post */}
         <div className="px-6 pb-4">
           <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
-            {content}
+            <ParsedText text={content} />
           </p>
         </div>
 

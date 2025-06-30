@@ -7,35 +7,59 @@ import Comment from "@/entities/Comment";
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get("q");
+    let query = searchParams.get("q");
     const type = searchParams.get("type") || "all";
 
-    if (!query || query.trim().length < 1) {
-      return NextResponse.json({ suggestions: [] });
+    if (!query) {
+      query = ""; // Permettre les queries vides pour montrer les suggestions par défaut
     }
 
     const searchTerm = query.trim();
     let suggestions = [];
 
     if (type === "users" || type === "all") {
+      let whereClause;
+
+      if (searchTerm === "") {
+        // Si pas de terme de recherche, récupérer tous les utilisateurs
+        whereClause = {};
+      } else {
+        // Sinon, chercher les utilisateurs correspondants
+        whereClause = {
+          [Op.or]: [
+            {
+              pseudo_user: {
+                [Op.like]: `${searchTerm}%`,
+              },
+            },
+            {
+              pseudo_user: {
+                [Op.like]: `%${searchTerm}%`,
+              },
+            },
+          ],
+        };
+      }
+
       const users = await User.findAll({
-        where: {
-          pseudo_user: {
-            [Op.like]: `${searchTerm}%`,
-          },
-        },
+        where: whereClause,
         attributes: ["id_user", "pseudo_user", "pfp_user"],
-        limit: 5,
-        order: [["pseudo_user", "ASC"]],
+        limit: 8,
+        order: [
+          // Prioriser les correspondances exactes au début
+          ["pseudo_user", "ASC"],
+        ],
       });
 
       suggestions.push(
         ...users.map((user) => ({
           type: "user",
           id: user.id_user,
-          label: user.pseudo_user,
-          avatar: user.pfp_user,
-          value: user.pseudo_user,
+          pseudo_user: user.pseudo_user,
+          pfp_user:
+            user.pfp_user ||
+            "https://ui-avatars.com/api/?name=User&background=random&color=fff&size=32",
+          text: user.pseudo_user,
         }))
       );
     }
@@ -63,40 +87,74 @@ export async function GET(request) {
       );
     }
 
-
     if (type === "hashtags" || type === "all") {
-      // Extraction simple des hashtags depuis les posts
-      const posts = await Post.findAll({
-        where: {
+      // Extraction des hashtags depuis les posts avec comptage
+      let whereClauseHashtags;
+
+      if (searchTerm === "") {
+        // Si pas de terme de recherche, récupérer tous les posts avec hashtags
+        whereClauseHashtags = {
+          text: {
+            [Op.like]: `%#%`,
+          },
+        };
+      } else {
+        // Sinon, chercher les posts avec hashtags correspondants
+        whereClauseHashtags = {
           text: {
             [Op.like]: `%#${searchTerm}%`,
           },
-        },
+        };
+      }
+
+      const posts = await Post.findAll({
+        where: whereClauseHashtags,
         attributes: ["text"],
-        limit: 10,
+        limit: 50,
+        order: [["post_id", "DESC"]],
       });
 
-      const hashtags = new Set();
+      const hashtagCounts = {};
+      const hashtagRegex = /#(\w+)/g;
+
       posts.forEach((post) => {
-        const matches = post.text.match(/#\w+/g);
+        const matches = post.text.match(hashtagRegex);
         if (matches) {
-          matches.forEach((tag) => {
-            if (tag.toLowerCase().includes(searchTerm.toLowerCase())) {
-              hashtags.add(tag);
+          matches.forEach((match) => {
+            const hashtag = match.slice(1).toLowerCase(); // Enlever le # et mettre en minuscules
+            // Si pas de terme de recherche ou si le hashtag contient le terme
+            if (
+              searchTerm === "" ||
+              hashtag.includes(searchTerm.toLowerCase())
+            ) {
+              hashtagCounts[hashtag] = (hashtagCounts[hashtag] || 0) + 1;
             }
           });
         }
       });
 
-      Array.from(hashtags)
-        .slice(0, 3)
-        .forEach((tag) => {
-          suggestions.push({
-            type: "hashtag",
-            label: tag,
-            value: tag,
-          });
-        });
+      // Convertir en array et trier par popularité
+      const hashtagSuggestions = Object.entries(hashtagCounts)
+        .map(([hashtag, count]) => ({
+          type: "hashtag",
+          text: hashtag,
+          hashtag: hashtag,
+          count: count,
+        }))
+        .sort((a, b) => {
+          // Prioriser les hashtags qui commencent par la requête
+          const aStartsWith = a.hashtag.startsWith(searchTerm.toLowerCase());
+          const bStartsWith = b.hashtag.startsWith(searchTerm.toLowerCase());
+
+          if (aStartsWith && !bStartsWith) return -1;
+          if (!aStartsWith && bStartsWith) return 1;
+
+          // Ensuite trier par popularité
+          return b.count - a.count;
+        })
+        .slice(0, 8);
+
+      suggestions.push(...hashtagSuggestions);
     }
 
     return NextResponse.json({ suggestions: suggestions.slice(0, 8) });
