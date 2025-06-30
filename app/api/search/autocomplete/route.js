@@ -63,7 +63,7 @@ export async function GET(request) {
         }))
       );
     }
-
+    /*
     if (type === "comments" || type === "all") {
       const comments = await Comment.findAll({
         where: {
@@ -81,11 +81,11 @@ export async function GET(request) {
         ...comments.map((comment) => ({
           type: "comment",
           id: comment.comment_id,
-          label: comment.text,
+          text: comment.text,
           value: comment.text,
         }))
       );
-    }
+    }*/
 
     if (type === "hashtags" || type === "all") {
       // Extraction des hashtags depuis les posts avec comptage
