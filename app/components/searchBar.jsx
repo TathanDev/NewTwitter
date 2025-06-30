@@ -81,30 +81,35 @@ export default function SearchBar() {
             {/* Suggestions dropdown */}
             {showSuggestions && suggestions.length > 0 && (
               <div className=" bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-600/50 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto">
-                {suggestions.map((suggestion, index) => (
-                  <button
-                    key={`${suggestion.type}-${suggestion.id || index}`}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl"
-                  >
-                    {suggestion.type === "user" && (
-                      <img
-                        src={suggestion.avatar}
-                        alt=""
-                        className="w-6 h-6 rounded-full"
-                      />
-                    )}
-                    {suggestion.type === "hashtag" && (
-                      <span className="text-blue-500">#</span>
-                    )}
-                    <span className="text-sm text-gray-900 dark:text-gray-100">
-                      {suggestion.label}
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
-                      {suggestion.type}
-                    </span>
-                  </button>
-                ))}
+                {suggestions.map(
+                  (suggestion, index) => (
+                    console.log(suggestion),
+                    (
+                      <button
+                        key={`${suggestion.type}-${suggestion.id || index}`}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl"
+                      >
+                        {suggestion.type === "user" && (
+                          <img
+                            src={suggestion.pfp_user}
+                            alt=""
+                            className="w-6 h-6 rounded-full"
+                          />
+                        )}
+                        {suggestion.type === "hashtag" && (
+                          <span className="text-blue-500">#</span>
+                        )}
+                        <span className="text-sm text-gray-900 dark:text-gray-100">
+                          {suggestion.text}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                          {suggestion.type}
+                        </span>
+                      </button>
+                    )
+                  )
+                )}
               </div>
             )}
             <div className="relative">
