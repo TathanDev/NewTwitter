@@ -2,7 +2,7 @@
 import PostComponent from "../components/post";
 import SearchBar from "../components/searchBar";
 
-export default function GetHomePage({ postsList, user }) {
+export default function GetHomePage({ postsList = [], user }) {
   return (
     <div>
       <div className="flex flex-col justify-center min-h-screen space-y-4">
@@ -55,12 +55,20 @@ export default function GetHomePage({ postsList, user }) {
           tabIndex={0}
           className="overflow-y-scroll h-[100vh] py-9 space-y-4 hide-scrollbar"
         >
-          {postsList.map((post) => (
-            <PostComponent
-              key={post.post_id}
-              post={post}
-            />
-          ))}
+          {postsList && postsList.length > 0 ? (
+            postsList.map((post) => (
+              <PostComponent
+                key={post.post_id}
+                post={post}
+              />
+            ))
+          ) : (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-gray-500 dark:text-gray-400 text-lg">
+                Aucun post à afficher
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

@@ -3,14 +3,15 @@
 // ==========================================
 
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSearch } from "../hooks/useSearch";
 import PostComponent from "../components/post";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function SearchResultsPage() {
+// Composant qui utilise useSearchParams
+function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const query = searchParams.get("q");
@@ -352,5 +353,27 @@ function UserResultCard({ user }) {
         </div>
       </div>
     </Link>
+  );
+}
+
+// Composant de fallback pour le chargement
+function SearchFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Composant principal exporté avec Suspense
+export default function SearchResultsPage() {
+  return (
+    <Suspense fallback={<SearchFallback />}>
+      <SearchContent />
+    </Suspense>
   );
 }
