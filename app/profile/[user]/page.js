@@ -1,3 +1,5 @@
+import UserPosts from "../../components/userPosts";
+
 export default async function ProfilePage({ params }) {
   const { user: userParam } = await params;
 
@@ -175,6 +177,12 @@ export default async function ProfilePage({ params }) {
             </div>
           </div>
         </div>
+
+        {/* Section des posts de l'utilisateur */}
+        <UserPosts 
+          userId={userData.id_user} 
+          username={userData.pseudo_user} 
+        />
 
         {/* Élément décoratif du bas */}
         <div className="flex justify-center mt-8">

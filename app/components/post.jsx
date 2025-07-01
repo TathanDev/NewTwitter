@@ -223,7 +223,9 @@ export default function PostComponent({
   const [localLikesCount, setLocalLikesCount] = useState(0);
   const [localCommentsCount, setLocalCommentsCount] = useState(0);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   const [showCopyNotification, setShowCopyNotification] = useState(false);
+  const [showFavoriteNotification, setShowFavoriteNotification] = useState(false);
 
   // Vérification que le post existe
   if (!post) {
@@ -253,6 +255,12 @@ export default function PostComponent({
         setLocalLikesCount(likesCount);
         setIsLiked(userHasLiked);
 
+        // Vérifier si ce post est dans les favoris de l'utilisateur
+        if (currentUserId && currentUser?.favorite_posts) {
+          const favoritesList = Array.isArray(currentUser.favorite_posts) ? currentUser.favorite_posts : [];
+          setIsSaved(favoritesList.includes(String(post.post_id)));
+        }
+
         // Utiliser le compteur externe s'il est fourni, sinon utiliser celui du post
         const commentsCountValue =
           externalCommentsCount !== undefined
@@ -281,7 +289,7 @@ export default function PostComponent({
     };
 
     loadUser();
-  }, [post.author, post.likes, currentUserId]);
+  }, [post.author, post.likes, currentUserId, currentUser?.favorite_posts]);
 
   // Effect pour mettre à jour le compteur de commentaires quand il change de l'extérieur
   useEffect(() => {
@@ -405,16 +413,62 @@ export default function PostComponent({
     }, 3000); // Masquer après 3 secondes
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     // Empêcher la propagation pour éviter la redirection
     e.stopPropagation();
 
+    // Vérifier si l'utilisateur est connecté
+    if (!currentUserId) {
+      console.warn("Utilisateur non connecté - impossible d'ajouter aux favoris");
+      return;
+    }
+
+    // Éviter les doubles clics
+    if (isFavoriteLoading) return;
+
+    // Optimistic update
+    const previousSaved = isSaved;
     setIsSaved(!isSaved);
-    console.log(
-      `${isSaved ? "Retirer des favoris" : "Sauvegarder"} le post ${
-        post.post_id
-      }`
-    );
+    setIsFavoriteLoading(true);
+
+    try {
+      const action = isSaved ? "remove" : "add";
+      const response = await fetch("/api/favorites", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          postId: post.post_id,
+          action: action,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      // Mettre à jour avec la réponse du serveur
+      setIsSaved(result.isFavorite);
+      
+      // Afficher la notification
+      setShowFavoriteNotification(true);
+      setTimeout(() => {
+        setShowFavoriteNotification(false);
+      }, 3000);
+
+      console.log(
+        `${result.isFavorite ? "Ajouté aux" : "Retiré des"} favoris: post ${post.post_id}`
+      );
+    } catch (error) {
+      // Rollback en cas d'erreur
+      setIsSaved(previousSaved);
+      console.error("Erreur lors de la gestion des favoris:", error);
+    } finally {
+      setIsFavoriteLoading(false);
+    }
   };
 
   const handleDelete = async (e) => {
@@ -494,6 +548,22 @@ export default function PostComponent({
           </svg>
           <span className="font-medium">
             Lien copié dans le presse-papiers !
+          </span>
+        </div>
+      )}
+      
+      {/* Notification de favoris */}
+      {showFavoriteNotification && (
+        <div className="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <svg
+            className="w-5 h-5"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+          <span className="font-medium">
+            {isSaved ? "Ajouté aux favoris !" : "Retiré des favoris !"}
           </span>
         </div>
       )}

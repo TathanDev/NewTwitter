@@ -1,7 +1,8 @@
 import { verifySession } from "@/utils/dal";
-import UserSettings from "../components/userSettings";
+import UnifiedProfile from "../components/unifiedProfile";
+import { redirect } from "next/navigation";
 
-export default async function Settings() {
+export default async function ProfilePage() {
   const session = await verifySession();
   if (!session) {
     return (
@@ -12,5 +13,5 @@ export default async function Settings() {
   }
   let data = await fetch("http://localhost:3000/api/user/" + session.userId);
   let user = await data.json();
-  return <UserSettings user={user} />;
+  return <UnifiedProfile user={user} />;
 }

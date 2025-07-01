@@ -37,29 +37,30 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en" className="hide-scrollbar" suppressHydrationWarning={true}>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              try {
-                var theme = localStorage.getItem('theme');
-                var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                var finalTheme = theme || systemTheme;
-                
-                if (finalTheme === 'dark') {
-                  document.documentElement.classList.add('dark');
-                } else {
-                  document.documentElement.classList.remove('dark');
+      <title>NewT</title>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  var finalTheme = theme || systemTheme;
+                  
+                  if (finalTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {
+                  // Fallback en cas d'erreur
                 }
-              } catch (e) {
-                // Fallback en cas d'erreur
-                console.warn('Theme detection failed:', e);
-              }
-            })();
-          `,
-        }}
-      />
-      <script src="//unpkg.com/react-scan/dist/auto.global.js" async></script>
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={
           `${geistSans.variable} ${geistMono.variable} antialiased` +
