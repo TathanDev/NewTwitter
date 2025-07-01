@@ -33,8 +33,21 @@ export default async function NavBar() {
   profile.length = 0;
 
   if (session) {
-    profile.push({ name: "Profile", href: "profile", current: false });
-    profile.push({ name: "Settings", href: "settings", current: false });
+    profile.push({
+      name: "Profile",
+      href: "http://localhost:3000/profile",
+      current: false,
+    });
+    profile.push({
+      name: "Settings",
+      href: "http://localhost:3000/settings",
+      current: false,
+    });
+    profile.push({
+      name: "Favorites",
+      href: "http://localhost:3000/favorites",
+      current: false,
+    });
     profile.push({ name: "Logout", href: "", current: false });
 
     const response = await fetch(
@@ -44,7 +57,9 @@ export default async function NavBar() {
       const user = await response.json();
       pfp = user.pfp_user;
     } else {
-      console.error(`Failed to fetch user: ${response.status} ${response.statusText}`);
+      console.error(
+        `Failed to fetch user: ${response.status} ${response.statusText}`
+      );
     }
   } else {
     profile.push({ name: "Login", href: "login", current: false });
@@ -197,6 +212,17 @@ export default async function NavBar() {
                         {item.name === "Settings" && (
                           <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
                             ⚙️
+                          </span>
+                        )}
+                        {item.name === "Favorites" && (
+                          <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
+                            <svg
+                              className="size-5 group-hover:scale-110 transition-transform duration-200"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            </svg>
                           </span>
                         )}
                         {item.name === "Login" && (

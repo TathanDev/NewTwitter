@@ -1,5 +1,6 @@
 import { verifySession } from "@/utils/dal";
-import ProfileForm from "../components/profile";
+import { redirect } from "next/navigation";
+import UnifiedProfile from "../components/unifiedProfile";
 
 export default async function ProfilePage() {
   const session = await verifySession();
@@ -12,5 +13,5 @@ export default async function ProfilePage() {
   }
   let data = await fetch("http://localhost:3000/api/user/" + session.userId);
   let user = await data.json();
-  return <ProfileForm user={user} />;
+  redirect("profile/" + session.userId);
 }

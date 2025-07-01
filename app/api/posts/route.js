@@ -1,8 +1,12 @@
-import { postController } from "@/entities/Post";
+import { postService } from "@/entities/Post";
+import { NextResponse } from "next/server";
 
-export default async function handler(req, res) {
-  if (req.method === "GET") {
-    return postController.getPosts(req, res);
+export async function GET() {
+  try {
+    const posts = await postService.getPostsWithLikesCount();
+    return NextResponse.json(posts);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des posts:", error);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
-  res.status(405).json({ error: "Méthode non autorisée" });
 }
