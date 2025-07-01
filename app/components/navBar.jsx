@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { logout } from "../actions/auth";
 import { verifySession } from "@/utils/dal";
+import MessageButton from "./MessageButton";
+import NewConversationButton from "./NewConversationButton";
 import {
   Disclosure,
   DisclosureButton,
@@ -28,7 +30,7 @@ function classNames(...classes) {
 }
 
 export default async function NavBar() {
-  pfp = "http://scriptum.odysseyus.fr/elements/img/user-icon-dark.png";
+  pfp = "public/users_pfp/1749576397214-City-Rain.png";
   const session = await verifySession();
   profile.length = 0;
 
@@ -161,17 +163,7 @@ export default async function NavBar() {
               </a>
 
               {/* Message */}
-              <a
-                type="button"
-                className="relative rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all duration-200 hover:shadow-md group"
-              >
-                <span className="absolute -inset-1.5" />
-                <span className="sr-only">View notifications</span>
-                <ChatBubbleBottomCenterTextIcon
-                  aria-hidden="true"
-                  className="size-5 group-hover:scale-110 transition-transform duration-200"
-                />
-              </a>
+              {session && <MessageButton />}
 
               {/* Profile dropdown */}
               <Menu as="div" className="relative">

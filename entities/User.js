@@ -18,7 +18,8 @@ const User = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
-      comment: "Email principal utilisé pour la connexion et l'authentification",
+      comment:
+        "Email principal utilisé pour la connexion et l'authentification",
     },
     password_user: {
       type: DataTypes.STRING(255),
@@ -30,8 +31,7 @@ const User = sequelize.define(
     },
     pfp_user: {
       type: DataTypes.STRING(255),
-      defaultValue:
-        "http://scriptum.odysseyus.fr/elements/img/user-icon-dark.png",
+      defaultValue: "",
     },
     birth_date: {
       type: DataTypes.DATEONLY,
@@ -44,14 +44,14 @@ const User = sequelize.define(
     // Champ pour stocker les IDs des posts favoris
     favorite_posts: {
       type: DataTypes.TEXT,
-      defaultValue: '[]',
+      defaultValue: "[]",
       allowNull: false,
       get() {
-        const rawValue = this.getDataValue('favorite_posts');
+        const rawValue = this.getDataValue("favorite_posts");
         return rawValue ? JSON.parse(rawValue) : [];
       },
       set(value) {
-        this.setDataValue('favorite_posts', JSON.stringify(value || []));
+        this.setDataValue("favorite_posts", JSON.stringify(value || []));
       },
     },
   },
