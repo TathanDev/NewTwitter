@@ -259,4 +259,36 @@ export const messageService = {
 
     return messages;
   },
+
+  // Supprimer une conversation entière
+  async deleteConversation(conversationId, userId) {
+    // Vérifier que l'utilisateur fait partie de la conversation
+    const userMessages = await Message.findOne({
+      where: {
+        conversation_id: conversationId,
+        [sequelize.Sequelize.Op.or]: [
+          { sender_id: userId },
+          { receiver_id: userId }
+        ],
+        is_deleted: false,
+      },
+    });
+
+    if (!userMessages) {
+      return false; // Conversation non trouvée ou utilisateur non autorisé
+    }
+
+    // Marquer tous les messages de la conversation comme supprimés
+    const [affectedRows] = await Message.update(
+      { is_deleted: true },
+      {
+        where: {
+          conversation_id: conversationId,
+          is_deleted: false,
+        },
+      }
+    );
+
+    return affectedRows > 0;
+  },
 };

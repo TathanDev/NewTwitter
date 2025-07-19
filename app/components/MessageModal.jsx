@@ -11,6 +11,7 @@ import {
   EllipsisVerticalIcon,
   MagnifyingGlassIcon,
   PlusIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 
 function MessageModal({ isOpen, onClose }) {
@@ -25,8 +26,10 @@ function MessageModal({ isOpen, onClose }) {
   const [isNewConversationModalOpen, setIsNewConversationModalOpen] =
     useState(false);
   const [typingUsers, setTypingUsers] = useState(new Set());
+  const [showDropdown, setShowDropdown] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // Initialize WebSocket hook
   const {
@@ -54,6 +57,20 @@ function MessageModal({ isOpen, onClose }) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // WebSocket effects - Join/leave conversations
   useEffect(() => {
@@ -203,6 +220,41 @@ function MessageModal({ isOpen, onClose }) {
     // Actualiser la liste des conversations après création d'une nouvelle
     await fetchConversations();
     setIsNewConversationModalOpen(false);
+  };
+
+  const deleteConversation = async () => {
+    if (!activeConversation) return;
+
+    try {
+      const response = await fetch(`/api/messages/conversations/${activeConversation}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Remove conversation from local state
+        setConversations(prev => 
+          prev.filter(conv => conv.conversation_id !== activeConversation)
+        );
+        
+        // Reset active conversation
+        setActiveConversation(null);
+        setActivePartner(null);
+        setMessages([]);
+        setShowDropdown(false);
+        
+        // If there are remaining conversations, select the first one
+        const remainingConversations = conversations.filter(
+          conv => conv.conversation_id !== activeConversation
+        );
+        if (remainingConversations.length > 0) {
+          selectConversation(remainingConversations[0]);
+        }
+      } else {
+        console.error('Failed to delete conversation');
+      }
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+    }
   };
 
   return (
@@ -362,9 +414,26 @@ function MessageModal({ isOpen, onClose }) {
                                 </p>
                               </div>
                             </div>
-                            <button className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-                              <EllipsisVerticalIcon className="w-5 h-5" />
-                            </button>
+                            <div className="relative" ref={dropdownRef}>
+                              <button 
+                                onClick={() => setShowDropdown(!showDropdown)}
+                                className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                              >
+                                <EllipsisVerticalIcon className="w-5 h-5" />
+                              </button>
+                              
+                              {showDropdown && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+                                  <button
+                                    onClick={deleteConversation}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                  >
+                                    <TrashIcon className="w-4 h-4 mr-2" />
+                                    Supprimer la conversation
+                                  </button>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
 
