@@ -54,6 +54,13 @@ const User = sequelize.define(
         this.setDataValue("favorite_posts", JSON.stringify(value || []));
       },
     },
+    // Paramètre de confidentialité pour les nouvelles conversations
+    allow_new_conversations: {
+      type: DataTypes.ENUM('everyone', 'followers', 'none'),
+      defaultValue: 'everyone',
+      allowNull: false,
+      comment: "Qui peut démarrer de nouvelles conversations avec cet utilisateur",
+    },
   },
   {
     tableName: "Users",

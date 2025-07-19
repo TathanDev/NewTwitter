@@ -60,3 +60,6 @@ export function useUser() {
   }
   return context;
 }
+
+// Export UserContext for backwards compatibility
+export { UserContext };

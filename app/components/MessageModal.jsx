@@ -199,9 +199,9 @@ function MessageModal({ isOpen, onClose }) {
     conv.partner?.pseudo?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleConversationCreated = () => {
+  const handleConversationCreated = async () => {
     // Actualiser la liste des conversations après création d'une nouvelle
-    fetchConversations();
+    await fetchConversations();
     setIsNewConversationModalOpen(false);
   };
 

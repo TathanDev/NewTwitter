@@ -36,6 +36,7 @@ export default function UnifiedProfile({ user }) {
     mail_user: user?.mail_user || "",
     birth_date: formatDateForDisplay(user?.birth_date) || "",
     country: user?.country || "",
+    allow_new_conversations: user?.allow_new_conversations || 'everyone',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -119,6 +120,7 @@ export default function UnifiedProfile({ user }) {
         mail_user: formData.mail_user,
         birth_date: formatDateForStorage(formData.birth_date),
         country: formData.country,
+        allow_new_conversations: formData.allow_new_conversations,
       };
 
       const response = await fetch(`/api/user/${user.id_user}`, {
@@ -434,6 +436,75 @@ export default function UnifiedProfile({ user }) {
                           <option value="Autre">Autre</option>
                         </select>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Section Confidentialité des messages */}
+                  <div className="mt-8">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                      Confidentialité des messages
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      Choisissez qui peut démarrer une nouvelle conversation avec vous.
+                    </p>
+
+                    <div className="space-y-3">
+                      <label className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                        <input
+                          type="radio"
+                          name="allow_conversations"
+                          value="everyone"
+                          checked={formData.allow_new_conversations === 'everyone'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, allow_new_conversations: e.target.value }))}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            🌍 Tout le monde
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            N'importe qui peut vous envoyer un message
+                          </div>
+                        </div>
+                      </label>
+
+                      <label className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                        <input
+                          type="radio"
+                          name="allow_conversations"
+                          value="followers"
+                          checked={formData.allow_new_conversations === 'followers'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, allow_new_conversations: e.target.value }))}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            👥 Personnes que vous suivez
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            Seules les personnes que vous suivez peuvent vous envoyer un message
+                          </div>
+                        </div>
+                      </label>
+
+                      <label className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer">
+                        <input
+                          type="radio"
+                          name="allow_conversations"
+                          value="none"
+                          checked={formData.allow_new_conversations === 'none'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, allow_new_conversations: e.target.value }))}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">
+                            🚫 Personne
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            Aucune nouvelle conversation ne peut être démarrée
+                          </div>
+                        </div>
+                      </label>
                     </div>
                   </div>
                 </div>

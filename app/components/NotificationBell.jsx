@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { useSocket } from '@/app/hooks/useSocket';
-import { useUser } from '@/app/context/UserContext';
+import { useUser } from '../context/UserContext';
 
 export default function NotificationBell() {
   const [notificationCount, setNotificationCount] = useState(0);

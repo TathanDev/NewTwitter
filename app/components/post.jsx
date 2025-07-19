@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useUser } from '../context/UserContext';
 import { ParsedText } from '../utils/textParser';
 import { createApiUrl } from '../../utils/url';
@@ -589,19 +590,31 @@ export default function PostComponent({
               </>
             ) : (
               <>
-                <img
-                  src={author.pfp_user}
-                  alt="Profil utilisateur"
-                  className="relative size-16 rounded-full bg-gray-50 dark:bg-gray-800"
-                  onError={(e) => {
-                    e.target.src =
-                      "https://ui-avatars.com/api/?name=User&background=random&color=fff&size=64";
-                  }}
-                />
+                <Link 
+                  href={`/profile/${author.pseudo_user}`}
+                  className="flex-shrink-0 hover:opacity-80 transition-opacity"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <img
+                    src={author.pfp_user}
+                    alt="Profil utilisateur"
+                    className="relative size-16 rounded-full bg-gray-50 dark:bg-gray-800"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://ui-avatars.com/api/?name=User&background=random&color=fff&size=64";
+                    }}
+                  />
+                </Link>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                    {author.pseudo_user}
-                  </h3>
+                  <Link 
+                    href={`/profile/${author.pseudo_user}`}
+                    className="hover:underline hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                      {author.pseudo_user}
+                    </h3>
+                  </Link>
                   <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                     <span>{username}</span>
                     <span>•</span>

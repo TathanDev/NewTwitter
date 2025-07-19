@@ -59,12 +59,11 @@ function NewConversationModal({ isOpen, onClose, onConversationCreated }) {
   async function startConversation(user) {
     try {
       setCreating(true);
-      const response = await fetch('/api/messages/send', {
+      const response = await fetch('/api/messages/conversations/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          receiverId: user.id_user,
-          content: `👋 Salut ${user.pseudo_user} !`,
+          participantId: user.id_user,
         }),
       });
 
