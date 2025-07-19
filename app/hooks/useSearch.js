@@ -38,7 +38,7 @@ export function useSearch() {
       });
 
       const response = await fetch(
-        `http://localhost:3000/api/search?${params}`
+        `/api/search?${params}`
       );
       const data = await response.json();
 

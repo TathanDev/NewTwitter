@@ -6,7 +6,7 @@
 
 🏗️ BUG QUAND ON BUILD
 ----------------------
- - useSearchParams should be wrapped [...]
+ -
 
 ####################################################
 #                                                  #

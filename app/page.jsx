@@ -1,6 +1,7 @@
 import GetHomePage from "./homePage/page";
 import GetLobby from "./lobby/page";
 import { verifySession } from "@/utils/dal";
+import { createApiUrl } from "@/utils/url";
 
 export default async function Page() {
   const isLoggedIn = await verifySession();
@@ -15,10 +16,10 @@ export default async function Page() {
   }
 
   // Si l'utilisateur est connecté, récupérer ses données
-  let data = await fetch("http://localhost:3000/api/user/" + isLoggedIn.userId);
+  let data = await fetch(createApiUrl(`/api/user/${isLoggedIn.userId}`));
   let user = await data.json();
 
-  let dataPosts = await fetch("http://localhost:3000/api/getPosts");
+  let dataPosts = await fetch(createApiUrl('/api/getPosts'));
   let postsList = await dataPosts.json();
 
   return (

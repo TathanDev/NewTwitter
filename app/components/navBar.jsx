@@ -3,6 +3,7 @@ import { logout } from "../actions/auth";
 import { verifySession } from "@/utils/dal";
 import MessageButton from "./MessageButton";
 import NewConversationButton from "./NewConversationButton";
+import { createApiUrl } from "@/utils/url";
 import {
   Disclosure,
   DisclosureButton,
@@ -37,24 +38,22 @@ export default async function NavBar() {
   if (session) {
     profile.push({
       name: "Profile",
-      href: "http://localhost:3000/profile",
+      href: "/profile",
       current: false,
     });
     profile.push({
       name: "Settings",
-      href: "http://localhost:3000/settings",
+      href: "/settings",
       current: false,
     });
     profile.push({
       name: "Favorites",
-      href: "http://localhost:3000/favorites",
+      href: "/favorites",
       current: false,
     });
     profile.push({ name: "Logout", href: "", current: false });
 
-    const response = await fetch(
-      `http://localhost:3000/api/user/${session.userId}`
-    );
+    const response = await fetch(createApiUrl(`/api/user/${session.userId}`));
     if (response.ok) {
       const user = await response.json();
       pfp = user.pfp_user;
@@ -102,7 +101,7 @@ export default async function NavBar() {
                 <div className="relative">
                   <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 dark:from-blue-400/30 dark:via-purple-400/30 dark:to-pink-400/30 rounded-2xl blur-lg"></div>
                   <a
-                    href="http://localhost:3000/"
+                    href="/"
                     className="relative text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 tracking-tight"
                   >
                     NewT

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useUser } from '../context/UserContext';
 import { ParsedText } from '../utils/textParser';
 import MentionAutocomplete from './MentionAutocomplete';
+import { createApiUrl } from '../../utils/url';
 
 const Heart = ({ className, ...props }) => (
   <svg
@@ -126,7 +127,7 @@ const getUser = async (pseudo) => {
       throw new Error("Pseudo manquant");
     }
 
-    const response = await fetch(`http://localhost:3000/api/user/${pseudo}`);
+    const response = await fetch(createApiUrl(`/api/user/${pseudo}`));
 
     if (!response.ok) {
       throw new Error(`Erreur HTTP: ${response.status}`);
