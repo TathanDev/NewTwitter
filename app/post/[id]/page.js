@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 
 async function getPost(postId) {
   try {
-    const response = await fetch(`http://localhost:3000/api/posts/${postId}`, {
+    const response = await fetch(`/api/posts/${postId}`, {
       cache: 'no-store'
     });
     

@@ -1,9 +1,10 @@
 import UserPosts from "../../components/userPosts";
+import { createApiUrl } from "@/utils/url";
 
 export default async function ProfilePage({ params }) {
   const { user: userParam } = await params;
 
-  const data = await fetch(`http://localhost:3000/api/user/${userParam}`);
+  const data = await fetch(createApiUrl(`/api/user/${userParam}`));
   const userData = await data.json();
 
   if (userData.error) {
@@ -74,7 +75,7 @@ export default async function ProfilePage({ params }) {
         <div className="flex items-center gap-4 mb-8">
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400">
-              <a href="http://localhost:3000" className="cursor-pointer">
+              <a href="/" className="cursor-pointer">
                 ⥃{" "}
               </a>
               Profil utilisateur
