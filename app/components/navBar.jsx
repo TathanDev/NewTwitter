@@ -3,6 +3,7 @@ import { logout } from "../actions/auth";
 import { verifySession } from "@/utils/dal";
 import MessageButton from "./MessageButton";
 import NewConversationButton from "./NewConversationButton";
+import NotificationBell from "./NotificationBell";
 import { createApiUrl } from "@/utils/url";
 import {
   Disclosure,
@@ -146,20 +147,7 @@ export default async function NavBar() {
                 />
               </a>
               {/* Notifications */}
-              <a
-                type="button"
-                className="relative rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all duration-200 hover:shadow-md group"
-              >
-                <span className="absolute -inset-1.5" />
-                <span className="sr-only">View notifications</span>
-                <BellIcon
-                  aria-hidden="true"
-                  className="size-5 group-hover:scale-110 transition-transform duration-200"
-                />
-
-                {/* Badge de notification (optionnel) */}
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-pink-500 to-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
-              </a>
+              {session && <NotificationBell />}
 
               {/* Message */}
               {session && <MessageButton />}

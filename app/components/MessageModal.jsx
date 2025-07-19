@@ -4,6 +4,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import Image from "next/image";
 import NewConversationModal from "./NewConversationModal";
+import useSocket from "../hooks/useSocket";
 import {
   XMarkIcon,
   PaperAirplaneIcon,
@@ -23,7 +24,21 @@ function MessageModal({ isOpen, onClose }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isNewConversationModalOpen, setIsNewConversationModalOpen] =
     useState(false);
+  const [typingUsers, setTypingUsers] = useState(new Set());
   const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+
+  // Initialize WebSocket hook
+  const {
+    socket,
+    isConnected,
+    sendMessage: sendSocketMessage,
+    joinConversation,
+    leaveConversation,
+    markAsRead,
+    startTyping,
+    stopTyping,
+  } = useSocket(currentUser?.id_user);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -39,6 +54,66 @@ function MessageModal({ isOpen, onClose }) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // WebSocket effects - Join/leave conversations
+  useEffect(() => {
+    if (!socket || !isConnected || !currentUser || !activeConversation) return;
+
+    console.log('Joining conversation:', activeConversation);
+    joinConversation(activeConversation);
+    
+    // Mark messages as read when joining conversation
+    markAsRead(activeConversation, currentUser.id_user);
+
+    return () => {
+      console.log('Leaving conversation:', activeConversation);
+      leaveConversation(activeConversation);
+    };
+  }, [socket, isConnected, currentUser, activeConversation]);
+
+  // Listen for new messages via WebSocket
+  useEffect(() => {
+    if (!socket || !isConnected) return;
+
+    const handleNewMessage = (message) => {
+      console.log('Received new message:', message);
+      
+      // Only add message if it belongs to the active conversation
+      if (message.conversation_id === activeConversation) {
+        setMessages(prev => {
+          // Check if message already exists to avoid duplicates
+          const exists = prev.some(msg => msg.message_id === message.message_id);
+          if (!exists) {
+            console.log('Adding message to conversation');
+            return [...prev, message];
+          }
+          return prev;
+        });
+      }
+      
+      // Always update conversations list for new messages
+      fetchConversations();
+    };
+
+    const handleMessageSent = (data) => {
+      console.log('Message sent successfully:', data);
+    };
+
+    const handleMessageError = (error) => {
+      console.error('Message sending failed:', error);
+    };
+
+    // Listen to socket events
+    socket.on('new-message', handleNewMessage);
+    socket.on('message-sent', handleMessageSent);
+    socket.on('message-error', handleMessageError);
+    
+    return () => {
+      socket.off('new-message', handleNewMessage);
+      socket.off('message-sent', handleMessageSent);
+      socket.off('message-error', handleMessageError);
+    };
+  }, [socket, isConnected, activeConversation]);
 
   async function fetchCurrentUser() {
     try {
@@ -84,53 +159,19 @@ function MessageModal({ isOpen, onClose }) {
     }
   }
 
-  async function sendMessage() {
-    console.log(activeConversation, currentUser);
-    if (newMessage.trim() === "" || !activeConversation || !currentUser) return;
+  function sendMessage() {
+    if (newMessage.trim() === "" || !activeConversation || !currentUser || !activePartner || !isConnected) return;
 
     const messageContent = newMessage.trim();
-
-    const tempMessage = {
-      message_id: Date.now(),
-      content: messageContent,
-      sender_id: currentUser.id_user,
-      sender: {
-        id: currentUser.id_user,
-        pseudo: currentUser.pseudo_user,
-        pfp: currentUser.pfp_user,
-      },
-      createdAt: new Date().toISOString(),
-    };
-
-    // Ajouter le message temporairement
-    setMessages((prev) => [...prev, tempMessage]);
     setNewMessage("");
 
-    try {
-      const response = await fetch("/api/messages/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          receiverId: activePartner.id,
-          content: messageContent,
-        }),
-      });
-
-      if (!response.ok) {
-        // Retirer le message temporaire en cas d'erreur
-        setMessages((prev) =>
-          prev.filter((msg) => msg.message_id !== tempMessage.message_id)
-        );
-        const errorData = await response.json();
-        console.error("Erreur lors de l'envoi du message:", errorData);
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'envoi du message:", error);
-      // Retirer le message temporaire en cas d'erreur
-      setMessages((prev) =>
-        prev.filter((msg) => msg.message_id !== tempMessage.message_id)
-      );
-    }
+    // Send message via WebSocket
+    sendSocketMessage({
+      senderId: currentUser.id_user,
+      receiverId: activePartner.id,
+      content: messageContent,
+      messageType: 'text'
+    });
   }
 
   const formatTime = (dateString) => {
@@ -197,9 +238,14 @@ function MessageModal({ isOpen, onClose }) {
                     {/* Header */}
                     <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                       <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                          Messages
-                        </h2>
+                        <div className="flex items-center space-x-2">
+                          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                            Messages
+                          </h2>
+                          <div className={`w-2 h-2 rounded-full ${
+                            isConnected ? 'bg-green-500' : 'bg-red-500'
+                          }`} title={isConnected ? 'Connecté' : 'Déconnecté'} />
+                        </div>
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => setIsNewConversationModalOpen(true)}
@@ -230,7 +276,7 @@ function MessageModal({ isOpen, onClose }) {
                     </div>
 
                     {/* Liste des conversations */}
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto scrollbar-hide">
                       {loading ? (
                         <div className="flex justify-center items-center h-32">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -262,7 +308,7 @@ function MessageModal({ isOpen, onClose }) {
                                   alt={conv.partner?.pseudo || "Utilisateur"}
                                   width={48}
                                   height={48}
-                                  className="rounded-full object-cover"
+                                  className="rounded-full object-cover w-12 h-12"
                                 />
                                 {conv.unread_count > 0 && (
                                   <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -305,7 +351,7 @@ function MessageModal({ isOpen, onClose }) {
                                 alt={activePartner.pseudo}
                                 width={40}
                                 height={40}
-                                className="rounded-full object-cover"
+                                className="rounded-full object-cover w-10 h-10"
                               />
                               <div>
                                 <h3 className="font-medium text-gray-900 dark:text-white">
@@ -323,7 +369,7 @@ function MessageModal({ isOpen, onClose }) {
                         </div>
 
                         {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-800">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-800 hide-scrollbar">
                           {messages.map((message, index) => {
                             const isOwn =
                               message.sender_id === currentUser?.id_user;
@@ -353,7 +399,7 @@ function MessageModal({ isOpen, onClose }) {
                                       alt={message.sender?.pseudo}
                                       width={32}
                                       height={32}
-                                      className="rounded-full object-cover mr-2"
+                                      className="rounded-full object-cover mr-2 w-8 h-8"
                                     />
                                   )}
                                   <div

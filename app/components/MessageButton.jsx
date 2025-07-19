@@ -2,17 +2,32 @@
 import { useState, useEffect } from "react";
 import { ChatBubbleBottomCenterTextIcon } from "@heroicons/react/24/outline";
 import MessageModal from "./MessageModal";
+import { useSocket } from '../hooks/useSocket';
+import { useUser } from '@/app/context/UserContext';
 
 export default function MessageButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { currentUser } = useUser();
+  const { socket } = useSocket(currentUser?.id_user);
 
   useEffect(() => {
+    // Fetch initial unread count
     fetchUnreadCount();
-    // Actualiser le compteur toutes les 30 secondes
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, []);
+
+    // Listen for real-time unread count updates
+    if (socket) {
+      const handleUnreadCountUpdate = (data) => {
+        setUnreadCount(data.unreadCount);
+      };
+
+      socket.on('unread-count-update', handleUnreadCountUpdate);
+
+      return () => {
+        socket.off('unread-count-update', handleUnreadCountUpdate);
+      };
+    }
+  }, [socket]);
 
   async function fetchUnreadCount() {
     try {

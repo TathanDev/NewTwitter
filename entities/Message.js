@@ -30,9 +30,12 @@ const Message = sequelize.define(
       comment: "Contenu du message",
     },
     message_type: {
-      type: DataTypes.ENUM("text", "image", "file"),
+      type: DataTypes.STRING,
       defaultValue: "text",
       allowNull: false,
+      validate: {
+        isIn: [["text", "image", "file"]],
+      },
     },
     media_url: {
       type: DataTypes.STRING(500),
@@ -65,7 +68,8 @@ const Message = sequelize.define(
   },
   {
     tableName: "Messages",
-    timestamps: true, // Ajoute createdAt et updatedAt automatiquement
+    timestamps: true, // Override global setting for this model
+    freezeTableName: true,
     indexes: [
       {
         fields: ["conversation_id"],
