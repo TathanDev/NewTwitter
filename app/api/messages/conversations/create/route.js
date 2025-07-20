@@ -50,11 +50,11 @@ export async function POST(request) {
       // Vérifier si l'utilisateur actuel suit le destinataire
       // Pour cela, nous devons importer et utiliser l'entité Follow
       try {
-        const { Follow } = await import('@/entities/Follow');
+        const Follow = (await import('@/entities/Follow')).default;
         const isFollowing = await Follow.findOne({
           where: {
             follower_id: session.userId,
-            followed_id: participantId
+            following_id: participantId
           }
         });
         
@@ -73,6 +73,14 @@ export async function POST(request) {
     // Générer l'ID de conversation
     const conversationId = messageService.generateConversationId(session.userId, participantId);
 
+    // Envoyer un message par défaut pour initier la conversation
+    const initialMessage = await messageService.sendMessage(
+      session.userId,
+      participantId,
+      `👋 Salut @${participant.pseudo_user} !`,
+      "text"
+    );
+
     // Récupérer les informations du participant pour la réponse
     const participantInfo = {
       id: participant.id_user,
@@ -85,8 +93,11 @@ export async function POST(request) {
       conversation: {
         conversation_id: conversationId,
         partner: participantInfo,
-        last_message: null,
-        unread_count: 0,
+        last_message: {
+          content: initialMessage.content,
+          createdAt: initialMessage.createdAt,
+        },
+        unread_count: 1,
       }
     });
   } catch (error) {

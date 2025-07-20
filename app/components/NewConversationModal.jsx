@@ -14,6 +14,7 @@ function NewConversationModal({ isOpen, onClose, onConversationCreated }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -27,7 +28,7 @@ function NewConversationModal({ isOpen, onClose, onConversationCreated }) {
       const response = await fetch('/api/search/autocomplete?q=&type=users');
       if (response.ok) {
         const data = await response.json();
-        setUsers(data.users || []);
+        setUsers(data.suggestions || []);
       }
     } catch (error) {
       console.error("Erreur lors de la récupération des utilisateurs:", error);
@@ -44,10 +45,10 @@ function NewConversationModal({ isOpen, onClose, onConversationCreated }) {
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=users`);
+      const response = await fetch(`/api/search/autocomplete?q=${encodeURIComponent(query)}&type=users`);
       if (response.ok) {
         const data = await response.json();
-        setUsers(data.users || []);
+        setUsers(data.suggestions || []);
       }
     } catch (error) {
       console.error("Erreur lors de la recherche d'utilisateurs:", error);
@@ -59,14 +60,18 @@ function NewConversationModal({ isOpen, onClose, onConversationCreated }) {
   async function startConversation(user) {
     try {
       setCreating(true);
+      setError(null);
+      
       const response = await fetch('/api/messages/conversations/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          participantId: user.id_user,
+          participantId: user.id,
         }),
       });
 
+      const data = await response.json();
+      
       if (response.ok) {
         // Fermer le modal et notifier le parent
         onClose();
@@ -74,9 +79,11 @@ function NewConversationModal({ isOpen, onClose, onConversationCreated }) {
           onConversationCreated();
         }
       } else {
-        console.error("Erreur lors du démarrage de la conversation");
+        setError(data.error || "Erreur lors du démarrage de la conversation");
+        console.error("Erreur lors du démarrage de la conversation:", data);
       }
     } catch (error) {
+      setError("Erreur réseau. Veuillez réessayer.");
       console.error("Erreur:", error);
     } finally {
       setCreating(false);
@@ -146,6 +153,13 @@ function NewConversationModal({ isOpen, onClose, onConversationCreated }) {
                       autoFocus
                     />
                   </div>
+                  
+                  {/* Message d'erreur */}
+                  {error && (
+                    <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Liste des utilisateurs */}
@@ -166,7 +180,7 @@ function NewConversationModal({ isOpen, onClose, onConversationCreated }) {
                     <div className="p-2">
                       {filteredUsers.map((user) => (
                         <button
-                          key={user.id_user}
+                          key={user.id}
                           onClick={() => startConversation(user)}
                           disabled={creating}
                           className="w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

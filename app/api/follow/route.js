@@ -3,6 +3,8 @@ import { verifySession, getUser } from "@/utils/dal";
 import Follow from "@/entities/Follow";
 import User from "@/entities/User";
 import sequelize from "@/utils/sequelize";
+import { notificationService } from "@/entities/Notification";
+import { emitNotification, getSocketIO } from "@/utils/socketUtils";
 
 // POST - Follow/Unfollow un utilisateur
 export async function POST(request) {
@@ -63,6 +65,23 @@ export async function POST(request) {
           { error: "Vous suivez déjà cet utilisateur" },
           { status: 400 }
         );
+      }
+
+      // Créer une notification de suivi
+      try {
+        await notificationService.createFollowNotification(
+          targetUserId,
+          user.id_user
+        );
+
+        // Émettre une notification temps réel
+        const io = getSocketIO();
+        if (io) {
+          await emitNotification(io, targetUserId, 'follow', user.id_user);
+        }
+      } catch (notifError) {
+        console.error('Erreur lors de la création de la notification de suivi:', notifError);
+        // Ne pas faire échouer l'action de follow pour un problème de notification
       }
 
       return NextResponse.json({

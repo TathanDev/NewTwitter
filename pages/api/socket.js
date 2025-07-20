@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import { messageService } from '../../entities/Message.js';
+import { notificationService } from '../../entities/Notification.js';
 
 const SocketHandler = (req, res) => {
   if (res.socket.server.io) {
@@ -19,6 +20,7 @@ const SocketHandler = (req, res) => {
   });
 
   res.socket.server.io = io;
+  global.io = io; // Stocker l'instance dans global pour y accéder depuis les APIs
 
   io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
@@ -85,6 +87,7 @@ const SocketHandler = (req, res) => {
         // Send updated unread count to receiver
         const unreadCount = await messageService.getUnreadCount(parseInt(receiverId));
         io.to(`user-${receiverId}`).emit('unread-count-update', { unreadCount });
+
 
         console.log(`Message sent in conversation ${conversationId}`);
         console.log(`Unread count for user ${receiverId}: ${unreadCount}`);

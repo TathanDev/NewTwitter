@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { verifySession, getUser } from "@/utils/dal";
 import { commentService } from "@/entities/Comment";
+import { notificationService } from "@/entities/Notification";
+import { postService } from "@/entities/Post";
+import { emitNotification, getSocketIO } from "@/utils/socketUtils";
+import User from "@/entities/User";
 
 // Like/Unlike un commentaire
 export async function POST(request, { params }) {
@@ -37,6 +41,33 @@ export async function POST(request, { params }) {
     let result;
     if (action === 'like') {
       result = await commentService.addLike(comment_id, userId);
+      
+      // Créer une notification de like pour l'auteur du commentaire
+      try {
+        // Récupérer le commentaire pour connaître l'auteur
+        const comment = await commentService.getCommentWithReplies(comment_id);
+        if (comment && comment.author !== (currentUser.pseudo_user || currentUser.id_user)) {
+          // Récupérer l'ID de l'auteur du commentaire
+          const author = await User.findOne({ where: { pseudo_user: comment.author } });
+          if (author) {
+            await notificationService.createLikeNotification(
+              author.id_user,
+              currentUser.id_user,
+              comment_id,
+              'comment'
+            );
+            
+            // Émettre une notification temps réel via socket
+            const io = getSocketIO();
+            if (io) {
+              await emitNotification(io, author.id_user, 'like', currentUser.id_user);
+            }
+          }
+        }
+      } catch (notifError) {
+        console.error('Erreur lors de la création de la notification de like commentaire:', notifError);
+        // Ne pas faire échouer le like à cause d'une erreur de notification
+      }
     } else if (action === 'unlike') {
       result = await commentService.removeLike(comment_id, userId);
     } else {
