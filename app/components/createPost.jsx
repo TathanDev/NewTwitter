@@ -234,11 +234,11 @@ export default function CreatePostPage({ user }) {
           </div>
         </div>
 
-        <div className="grid gap-8">
+        <div className="grid lg:grid-cols-2 gap-8">
           {/* Formulaire de création */}
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/80 dark:to-gray-700/80 p-6 rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-600/30 backdrop-blur-sm">
-              <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/80 dark:to-gray-700/80 p-4 md:p-6 rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-600/30 backdrop-blur-sm">
+              <h2 className="text-lg md:text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
                 Contenu du post
               </h2>
 
@@ -260,14 +260,14 @@ export default function CreatePostPage({ user }) {
             </div>
 
             {/* Zone de téléchargement de fichier */}
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/80 dark:to-gray-700/80 p-6 rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-600/30 backdrop-blur-sm">
-              <h2 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/80 dark:to-gray-700/80 p-4 md:p-6 rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-600/30 backdrop-blur-sm">
+              <h2 className="text-lg md:text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">
                 Médias
               </h2>
 
               {!selectedFile ? (
                 <div
-                  className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${
+                  className={`border-2 border-dashed rounded-2xl p-4 md:p-8 text-center transition-all duration-300 ${
                     isDragOver
                       ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                       : "border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700/50"
@@ -276,15 +276,15 @@ export default function CreatePostPage({ user }) {
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                 >
-                  <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <p className="text-gray-600 dark:text-gray-400 mb-2">
+                  <Upload className="w-8 md:w-12 h-8 md:h-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-2">
                     Glissez-déposez une image ou vidéo ici
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+                  <p className="text-xs md:text-sm text-gray-500 dark:text-gray-500 mb-4">
                     ou
                   </p>
-                  <label className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 cursor-pointer">
-                    <Upload className="w-5 h-5" />
+                  <label className="inline-flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 cursor-pointer text-sm md:text-base">
+                    <Upload className="w-4 md:w-5 h-4 md:h-5" />
                     Choisir un fichier
                     <input
                       type="file"
@@ -323,41 +323,53 @@ export default function CreatePostPage({ user }) {
               )}
             </div>
 
-            {/* Prévisualisation */}
-            <div className="lg:block">
-              <div className="sticky top-8">
-                <h2 className="text-xl font-bold mb-4 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-                  Aperçu en temps réel
-                </h2>
-
-                {postContent.trim() || selectedFile ? (
-                  <PostPreview />
-                ) : (
-                  <div className="max-w-2xl mx-auto bg-gray-100 dark:bg-gray-800 rounded-2xl p-12 text-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Eye className="w-8 h-8 text-white" />
-                    </div>
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Votre post apparaîtra ici
-                    </p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-                      Commencez à écrire ou ajoutez un média
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Boutons d'action */}
-            <div className="flex gap-4">
+            {/* Boutons d'action - Mobile uniquement */}
+            <div className="lg:hidden">
               <button
                 onClick={handleSubmit}
                 disabled={!postContent.trim() && !selectedFile}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-5 h-5" />
                 Publier
               </button>
+            </div>
+          </div>
+          
+          {/* Prévisualisation - Desktop uniquement */}
+          <div className="hidden lg:block">
+            <div className="sticky top-8">
+              <h2 className="text-lg md:text-xl font-bold mb-4 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+                Aperçu en temps réel
+              </h2>
+
+              {postContent.trim() || selectedFile ? (
+                <PostPreview />
+              ) : (
+                <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-8 md:p-12 text-center">
+                  <div className="w-12 md:w-16 h-12 md:h-16 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Eye className="w-6 md:w-8 h-6 md:h-8 text-white" />
+                  </div>
+                  <p className="text-sm md:text-base text-gray-500 dark:text-gray-400">
+                    Votre post apparaîtra ici
+                  </p>
+                  <p className="text-xs md:text-sm text-gray-400 dark:text-gray-500 mt-2">
+                    Commencez à écrire ou ajoutez un média
+                  </p>
+                </div>
+              )}
+
+              {/* Boutons d'action - Desktop uniquement */}
+              <div className="hidden lg:block mt-6">
+                <button
+                  onClick={handleSubmit}
+                  disabled={!postContent.trim() && !selectedFile}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Send className="w-5 h-5" />
+                  Publier
+                </button>
+              </div>
             </div>
           </div>
         </div>
