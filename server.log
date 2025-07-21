@@ -1,0 +1,31 @@
+nohup: ignoring input
+
+> my-app@0.1.0 dev
+> NODE_OPTIONS='--inspect' next dev -H 0.0.0.0
+
+Debugger listening on ws://127.0.0.1:9229/7eb4784f-592d-4a09-9df0-0703deddc713
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger listening on ws://127.0.0.1:9230/80305bc2-4a0b-443f-9936-4989431e8b45
+For help, see: https://nodejs.org/en/docs/inspector
+   the --inspect option was detected, the Next.js router server should be inspected at 9230.
+   ▲ Next.js 15.0.3
+   - Local:        http://localhost:3000
+   - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 1608ms
+ ✓ Compiled /api/socket in 201ms (74 modules)
+Initializing Socket.IO server
+Socket server already running
+ GET /api/socket?EIO=4&transport=polling&t=xi2h1qvb 200 in 411ms
+ GET /api/socket?EIO=4&transport=polling&t=xi2h11og 200 in 411ms
+User connected: epsflIsxJcwtjWbPAAAC
+User connected: CRyO5sUuwIW3zwV-AAAD
+User 7 joined personal room
+User 7 joined personal room
+ ○ Compiling / ...
+ ✓ Compiled / in 2.9s (1912 modules)
+Failed to verify session
+ HEAD / 200 in 3489ms
+ ✓ Compiled in 715ms (753 modules)
+[?25h

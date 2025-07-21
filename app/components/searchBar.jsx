@@ -60,14 +60,21 @@ export default function SearchBar() {
   };
 
   const handleSuggestionClick = (suggestion) => {
-    setSearchQuery(suggestion.value);
+    // Utiliser la bonne propriété selon le type de suggestion
+    const searchValue = suggestion.type === "hashtag" 
+      ? suggestion.hashtag || suggestion.text 
+      : suggestion.text || suggestion.value || "";
+    
+    setSearchQuery(searchValue);
     setShowSuggestions(false);
+    
     if (suggestion.type === "user") {
-      router.push(`/profile/${suggestion.id}`);
+      router.push(`/profile/${suggestion.pseudo_user}`);
     } else {
-      search(
-        suggestion.value,
-        suggestion.type === "hashtag" ? "hashtags" : selectedFilter
+      // Pour les hashtags, rediriger vers la page de recherche
+      const searchType = suggestion.type === "hashtag" ? "hashtags" : selectedFilter;
+      router.push(
+        `/search?q=${encodeURIComponent(searchValue)}&type=${searchType}`
       );
     }
   };

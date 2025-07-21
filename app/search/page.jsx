@@ -33,7 +33,7 @@ function SearchContent() {
 
   if (!query) {
     return (
-      <main className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 flex items-center justify-center px-4 relative overflow-hidden">
+      <main className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 flex items-center justify-center px-4 pt-20 relative overflow-hidden">
         {/* Formes décoratives d'arrière-plan */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/20 to-purple-400/20 dark:from-blue-500/30 dark:to-purple-500/30 rounded-full blur-xl animate-pulse"></div>
@@ -59,7 +59,7 @@ function SearchContent() {
   }
 
   return (
-    <main className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 px-4 py-8 relative overflow-hidden">
+    <main className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300 px-4 pt-20 pb-8 relative overflow-hidden">
       {/* Formes décoratives d'arrière-plan */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Bulles flottantes */}
@@ -266,7 +266,7 @@ function SearchContent() {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 

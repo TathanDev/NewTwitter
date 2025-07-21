@@ -4,6 +4,7 @@ import { verifySession } from "@/utils/dal";
 import MessageButton from "./MessageButton";
 import NewConversationButton from "./NewConversationButton";
 import NotificationBell from "./NotificationBell";
+import ProfileImage from "./ProfileImage";
 import { createApiUrl } from "@/utils/url";
 import {
   Disclosure,
@@ -32,7 +33,7 @@ function classNames(...classes) {
 }
 
 export default async function NavBar() {
-  pfp = "public/users_pfp/1749576397214-City-Rain.png";
+  pfp = "/users_pfp/1752950264309-archlinux-btw.png";
   const session = await verifySession();
   profile.length = 0;
 
@@ -133,24 +134,34 @@ export default async function NavBar() {
             </div>
 
             {/* Actions à droite */}
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0 space-x-3">
-              {/* Post */}
-              <a
-                href="createPost"
-                className="relative rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all duration-200 hover:shadow-md group"
-              >
-                <span className="absolute -inset-1.5" />
-                <span className="sr-only">Poster</span>
-                <PlusIcon
-                  aria-hidden="true"
-                  className="size-5 group-hover:scale-110 transition-transform duration-200"
-                />
-              </a>
-              {/* Notifications */}
-              {session && <NotificationBell />}
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0 space-x-2 sm:space-x-3">
+              {/* Post - Hidden on mobile et quand pas connecté */}
+              {session && (
+                <a
+                  href="createPost"
+                  className="hidden sm:flex relative rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all duration-200 hover:shadow-md group"
+                >
+                  <span className="absolute -inset-1.5" />
+                  <span className="sr-only">Poster</span>
+                  <PlusIcon
+                    aria-hidden="true"
+                    className="size-5 group-hover:scale-110 transition-transform duration-200"
+                  />
+                </a>
+              )}
+              {/* Notifications - More compact on mobile */}
+              {session && (
+                <div className="hidden sm:block">
+                  <NotificationBell />
+                </div>
+              )}
 
-              {/* Message */}
-              {session && <MessageButton />}
+              {/* Message - More compact on mobile */}
+              {session && (
+                <div className="hidden sm:block">
+                  <MessageButton />
+                </div>
+              )}
 
               {/* Profile dropdown */}
               <Menu as="div" className="relative">
@@ -158,9 +169,9 @@ export default async function NavBar() {
                   <MenuButton className="relative flex rounded-xl bg-gray-100 dark:bg-gray-800 p-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 hover:shadow-md transition-all duration-200 group">
                     <span className="absolute -inset-1.5" />
                     <span className="sr-only">Open user menu</span>
-                    <img
-                      alt=""
+                    <ProfileImage
                       src={pfp}
+                      alt=""
                       className="size-8 rounded-lg group-hover:scale-110 transition-transform duration-200 object-cover"
                     />
                   </MenuButton>
@@ -247,6 +258,41 @@ export default async function NavBar() {
                 {item.name}
               </DisclosureButton>
             ))}
+            
+            {/* Mobile Actions */}
+            {session && (
+              <>
+                {/* Créer un post */}
+                <DisclosureButton
+                  as="a"
+                  href="/createPost"
+                  className="flex items-center space-x-3 rounded-xl px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-all duration-200 hover:shadow-md"
+                >
+                  <PlusIcon className="size-5" aria-hidden="true" />
+                  <span>Créer un post</span>
+                </DisclosureButton>
+                
+                {/* Messages */}
+                <DisclosureButton
+                  as="a"
+                  href="/messages"
+                  className="flex items-center space-x-3 rounded-xl px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-all duration-200 hover:shadow-md"
+                >
+                  <ChatBubbleBottomCenterTextIcon className="size-5" aria-hidden="true" />
+                  <span>Messages</span>
+                </DisclosureButton>
+                
+                {/* Notifications */}
+                <DisclosureButton
+                  as="a"
+                  href="/notifications"
+                  className="flex items-center space-x-3 rounded-xl px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-all duration-200 hover:shadow-md"
+                >
+                  <BellIcon className="size-5" aria-hidden="true" />
+                  <span>Notifications</span>
+                </DisclosureButton>
+              </>
+            )}
           </div>
         </DisclosurePanel>
       </Disclosure>

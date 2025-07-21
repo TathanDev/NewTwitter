@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "NODE_OPTIONS='--inspect' next dev -H 0.0.0.0",
+    "dev": "NODE_OPTIONS='--inspect' next dev -H 0.0.0.0 -p 3000",
+    "dev-https": "node server-https.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

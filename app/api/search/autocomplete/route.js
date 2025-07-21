@@ -60,6 +60,7 @@ export async function GET(request) {
             user.pfp_user ||
             "https://ui-avatars.com/api/?name=User&background=random&color=fff&size=32",
           text: user.pseudo_user,
+          value: user.pseudo_user, // Ajouter value pour la consistance
         }))
       );
     }
@@ -139,6 +140,7 @@ export async function GET(request) {
           type: "hashtag",
           text: hashtag,
           hashtag: hashtag,
+          value: hashtag, // Ajouter value pour la consistance
           count: count,
         }))
         .sort((a, b) => {
