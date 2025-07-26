@@ -14,6 +14,7 @@ export function UserProvider({ children, initialUser = null }) {
     }
   }, [initialUser]);
 
+
   const fetchCurrentUser = async () => {
     try {
       setIsLoading(true);

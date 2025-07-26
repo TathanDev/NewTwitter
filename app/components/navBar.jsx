@@ -5,6 +5,7 @@ import MessageButton from "./MessageButton";
 import NewConversationButton from "./NewConversationButton";
 import NotificationBell from "./NotificationBell";
 import ProfileImage from "./ProfileImage";
+import LogoutButton from "./LogoutButton";
 import { createApiUrl } from "@/utils/url";
 import {
   Disclosure,
@@ -183,54 +184,60 @@ export default async function NavBar() {
                 >
                   {profile.map((item, index) => (
                     <MenuItem key={item.name}>
-                      <a
-                        href={item.href}
-                        className={classNames(
-                          "group flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 data-[focus]:bg-gradient-to-r data-[focus]:from-blue-50 data-[focus]:to-purple-50 dark:data-[focus]:from-blue-900/20 dark:data-[focus]:to-purple-900/20 data-[focus]:outline rounded-sm",
-                          item.name === "Logout"
-                            ? "text-red-600 dark:text-red-400 data-[focus]:text-red-700 dark:data-[focus]:text-red-300"
-                            : "text-gray-700 dark:text-gray-300 data-[focus]:text-gray-900 dark:data-[focus]:text-white"
-                        )}
-                        onClick={item.name === "Logout" ? logout : undefined}
-                      >
-                        <span className="flex-1">{item.name}</span>
-                        {item.name === "Profile" && (
-                          <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
-                            👤
-                          </span>
-                        )}
-                        {item.name === "Settings" && (
-                          <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
-                            ⚙️
-                          </span>
-                        )}
-                        {item.name === "Favorites" && (
-                          <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
-                            <svg
-                              className="size-5 group-hover:scale-110 transition-transform duration-200"
-                              fill="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                            </svg>
-                          </span>
-                        )}
-                        {item.name === "Login" && (
-                          <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
-                            🔑
-                          </span>
-                        )}
-                        {item.name === "Register" && (
-                          <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
-                            ✨
-                          </span>
-                        )}
-                        {item.name === "Logout" && (
+                      {item.name === "Logout" ? (
+                        <LogoutButton
+                          className={classNames(
+                            "group flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 data-[focus]:bg-gradient-to-r data-[focus]:from-blue-50 data-[focus]:to-purple-50 dark:data-[focus]:from-blue-900/20 dark:data-[focus]:to-purple-900/20 data-[focus]:outline rounded-sm w-full text-left",
+                            "text-red-600 dark:text-red-400 data-[focus]:text-red-700 dark:data-[focus]:text-red-300"
+                          )}
+                        >
+                          <span className="flex-1">{item.name}</span>
                           <span className="text-red-400 group-data-[focus]:text-red-500">
                             🚪
                           </span>
-                        )}
-                      </a>
+                        </LogoutButton>
+                      ) : (
+                        <a
+                          href={item.href}
+                          className={classNames(
+                            "group flex items-center px-4 py-3 text-sm font-medium transition-all duration-200 data-[focus]:bg-gradient-to-r data-[focus]:from-blue-50 data-[focus]:to-purple-50 dark:data-[focus]:from-blue-900/20 dark:data-[focus]:to-purple-900/20 data-[focus]:outline rounded-sm",
+                            "text-gray-700 dark:text-gray-300 data-[focus]:text-gray-900 dark:data-[focus]:text-white"
+                          )}
+                        >
+                          <span className="flex-1">{item.name}</span>
+                          {item.name === "Profile" && (
+                            <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
+                              👤
+                            </span>
+                          )}
+                          {item.name === "Settings" && (
+                            <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
+                              ⚙️
+                            </span>
+                          )}
+                          {item.name === "Favorites" && (
+                            <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
+                              <svg
+                                className="size-5 group-hover:scale-110 transition-transform duration-200"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                              </svg>
+                            </span>
+                          )}
+                          {item.name === "Login" && (
+                            <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
+                              🔑
+                            </span>
+                          )}
+                          {item.name === "Register" && (
+                            <span className="text-gray-400 group-data-[focus]:text-gray-600 dark:group-data-[focus]:text-gray-300">
+                              ✨
+                            </span>
+                          )}
+                        </a>
+                      )}
                     </MenuItem>
                   ))}
                 </MenuItems>

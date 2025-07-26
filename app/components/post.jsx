@@ -238,7 +238,7 @@ export default function PostComponent({
     );
   }
 
-  // Effect pour charger les données utilisateur et initialiser les states
+  // Effect pour charger les données utilisateur
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -248,20 +248,6 @@ export default function PostComponent({
         // Récupérer les données utilisateur
         const userData = await getUser(post.author);
         setAuthor(userData);
-
-        // Initialiser le nombre de likes et le statut liked
-        const likesArray = Array.isArray(post.likes) ? post.likes : [];
-        const likesCount = likesArray.length;
-        const userHasLiked = currentUserId ? likesArray.includes(currentUserId) : false;
-
-        setLocalLikesCount(likesCount);
-        setIsLiked(userHasLiked);
-
-        // Vérifier si ce post est dans les favoris de l'utilisateur
-        if (currentUserId && currentUser?.favorite_posts) {
-          const favoritesList = Array.isArray(currentUser.favorite_posts) ? currentUser.favorite_posts : [];
-          setIsSaved(favoritesList.includes(String(post.post_id)));
-        }
 
         // Utiliser le compteur externe s'il est fourni, sinon utiliser celui du post
         const commentsCountValue =
@@ -280,18 +266,32 @@ export default function PostComponent({
           pfp_user:
             "https://ui-avatars.com/api/?name=User&background=random&color=fff&size=64",
         });
-
-        // Initialiser les likes même en cas d'erreur
-        const likesArray = Array.isArray(post.likes) ? post.likes : [];
-        setLocalLikesCount(likesArray.length);
-        setIsLiked(currentUserId ? likesArray.includes(currentUserId) : false);
       } finally {
         setIsLoadingUser(false);
       }
     };
 
     loadUser();
-  }, [post.author, post.likes, currentUserId, currentUser?.favorite_posts]);
+  }, [post.author, externalCommentsCount, post.comments_count]);
+
+  // Effect séparé pour initialiser les états utilisateur (likes, favoris)
+  useEffect(() => {
+    // Initialiser le nombre de likes et le statut liked
+    const likesArray = Array.isArray(post.likes) ? post.likes : [];
+    const likesCount = likesArray.length;
+    const userHasLiked = currentUserId ? likesArray.includes(currentUserId) : false;
+
+    setLocalLikesCount(likesCount);
+    setIsLiked(userHasLiked);
+
+    // Vérifier si ce post est dans les favoris de l'utilisateur
+    if (currentUserId && currentUser?.favorite_posts) {
+      const favoritesList = Array.isArray(currentUser.favorite_posts) ? currentUser.favorite_posts : [];
+      setIsSaved(favoritesList.includes(String(post.post_id)));
+    } else {
+      setIsSaved(false);
+    }
+  }, [post.likes, currentUserId, currentUser?.favorite_posts, post.post_id]);
 
   // Effect pour mettre à jour le compteur de commentaires quand il change de l'extérieur
   useEffect(() => {
