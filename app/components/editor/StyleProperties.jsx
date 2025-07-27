@@ -39,12 +39,14 @@ export default function StyleProperties({ styleConfig, onStyleChange }) {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Couleur d'arrière-plan
           </label>
-          <input
-            type="color"
-            value={styleConfig.background?.value || '#ffffff'}
-            onChange={(e) => updateBackground(e.target.value)}
-            className="w-full h-10 rounded border border-gray-300 dark:border-gray-600"
-          />
+          <div className="color-input w-full h-10">
+            <input
+              type="color"
+              value={styleConfig.background?.value || '#ffffff'}
+              onChange={(e) => updateBackground(e.target.value)}
+              title="Sélectionner une couleur d'arrière-plan"
+            />
+          </div>
         </div>
 
         {/* Bordures arrondies */}
@@ -74,12 +76,14 @@ export default function StyleProperties({ styleConfig, onStyleChange }) {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Couleur de bordure
           </label>
-          <input
-            type="color"
-            value={styleConfig.border?.color || '#e0e0e0'}
-            onChange={(e) => updateBorderColor(e.target.value)}
-            className="w-full h-10 rounded border border-gray-300 dark:border-gray-600"
-          />
+          <div className="color-input w-full h-10">
+            <input
+              type="color"
+              value={styleConfig.border?.color || '#e0e0e0'}
+              onChange={(e) => updateBorderColor(e.target.value)}
+              title="Sélectionner une couleur de bordure"
+            />
+          </div>
         </div>
 
         {/* Épaisseur de bordure */}

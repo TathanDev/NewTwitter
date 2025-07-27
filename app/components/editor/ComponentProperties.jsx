@@ -11,109 +11,150 @@ export default function ComponentProperties({ component, onUpdate, onRemove }) {
         return (
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
                 Contenu
               </label>
-              <textarea
-                value={component.data.content || ''}
-                onChange={(e) => onUpdate({ content: e.target.value })}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                rows={3}
-                placeholder="Tapez votre texte ici..."
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Couleur
-                </label>
-                <input
-                  type="color"
-                  value={component.data.formatting?.color || '#333333'}
-                  onChange={(e) => onUpdate({ 
-                    formatting: { 
-                      ...component.data.formatting, 
-                      color: e.target.value 
-                    }
-                  })}
-                  className="w-full h-10 rounded border border-gray-300 dark:border-gray-600"
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400 rounded-2xl blur opacity-20 group-focus-within:opacity-50 transition duration-300"></div>
+                <textarea
+                  value={component.data.content || ''}
+                  onChange={(e) => onUpdate({ content: e.target.value })}
+                  className="relative w-full py-3 px-4 text-base text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 rounded-2xl border border-gray-300/50 dark:border-gray-600/30 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 focus:border-transparent transition-all duration-300 shadow-lg hover:shadow-xl resize-none"
+                  rows={3}
+                  placeholder="Tapez votre texte ici..."
                 />
               </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                  Couleur du texte
+                </label>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400 rounded-2xl blur opacity-20 group-hover:opacity-50 transition duration-300"></div>
+                  <div className="relative flex items-center space-x-3 bg-white dark:bg-gray-800 rounded-2xl p-3 border border-gray-300/50 dark:border-gray-600/30">
+                    <div className="color-input w-12 h-12">
+                      <input
+                        type="color"
+                        value={component.data.formatting?.color || '#333333'}
+                        onChange={(e) => onUpdate({ 
+                          formatting: { 
+                            ...component.data.formatting, 
+                            color: e.target.value 
+                        }
+                        })}
+                        title="Sélectionner une couleur de texte"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Couleur actuelle</div>
+                      <input
+                        type="text"
+                        value={component.data.formatting?.color || '#333333'}
+                        onChange={(e) => onUpdate({ 
+                          formatting: { 
+                            ...component.data.formatting, 
+                            color: e.target.value 
+                        }
+                        })}
+                        className="w-20 px-2 py-1 text-xs font-mono bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="#333333"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Taille
+                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                  Taille de police
                 </label>
-                <select
-                  value={component.data.formatting?.fontSize || '16px'}
-                  onChange={(e) => onUpdate({ 
-                    formatting: { 
-                      ...component.data.formatting, 
-                      fontSize: e.target.value 
-                    }
-                  })}
-                  className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="12px">12px</option>
-                  <option value="14px">14px</option>
-                  <option value="16px">16px</option>
-                  <option value="18px">18px</option>
-                  <option value="20px">20px</option>
-                  <option value="24px">24px</option>
-                  <option value="32px">32px</option>
-                </select>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <input
+                      type="range"
+                      min="12"
+                      max="32"
+                      step="2"
+                      value={parseInt(component.data.formatting?.fontSize || '16')}
+                      onChange={(e) => onUpdate({ 
+                        formatting: { 
+                          ...component.data.formatting, 
+                          fontSize: `${e.target.value}px` 
+                        }
+                      })}
+                      className="w-full h-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg appearance-none cursor-pointer slider"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      <span>Petit</span>
+                      <span>Normal</span>
+                      <span>Grand</span>
+                      <span>Très grand</span>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                      {component.data.formatting?.fontSize || '16px'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div className="flex space-x-2">
-              <button
-                onClick={() => onUpdate({ 
-                  formatting: { 
-                    ...component.data.formatting, 
-                    fontWeight: component.data.formatting?.fontWeight === 'bold' ? 'normal' : 'bold'
-                  }
-                })}
-                className={`px-3 py-1 rounded text-sm font-bold ${
-                  component.data.formatting?.fontWeight === 'bold'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                B
-              </button>
-              
-              <button
-                onClick={() => onUpdate({ 
-                  formatting: { 
-                    ...component.data.formatting, 
-                    fontStyle: component.data.formatting?.fontStyle === 'italic' ? 'normal' : 'italic'
-                  }
-                })}
-                className={`px-3 py-1 rounded text-sm italic ${
-                  component.data.formatting?.fontStyle === 'italic'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                I
-              </button>
-              
-              <button
-                onClick={() => onUpdate({ 
-                  formatting: { 
-                    ...component.data.formatting, 
-                    textDecoration: component.data.formatting?.textDecoration === 'underline' ? 'none' : 'underline'
-                  }
-                })}
-                className={`px-3 py-1 rounded text-sm underline ${
-                  component.data.formatting?.textDecoration === 'underline'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                U
-              </button>
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                Formatage
+              </label>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => onUpdate({ 
+                    formatting: { 
+                      ...component.data.formatting, 
+                      fontWeight: component.data.formatting?.fontWeight === 'bold' ? 'normal' : 'bold'
+                    }
+                  })}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                    component.data.formatting?.fontWeight === 'bold'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200/50 dark:border-gray-600/30'
+                  }`}
+                >
+                  B
+                </button>
+                
+                <button
+                  onClick={() => onUpdate({ 
+                    formatting: { 
+                      ...component.data.formatting, 
+                      fontStyle: component.data.formatting?.fontStyle === 'italic' ? 'normal' : 'italic'
+                    }
+                  })}
+                  className={`px-4 py-2 rounded-xl text-sm italic transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                    component.data.formatting?.fontStyle === 'italic'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200/50 dark:border-gray-600/30'
+                  }`}
+                >
+                  I
+                </button>
+                
+                <button
+                  onClick={() => onUpdate({ 
+                    formatting: { 
+                      ...component.data.formatting, 
+                      textDecoration: component.data.formatting?.textDecoration === 'underline' ? 'none' : 'underline'
+                    }
+                  })}
+                  className={`px-4 py-2 rounded-xl text-sm underline transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                    component.data.formatting?.textDecoration === 'underline'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200/50 dark:border-gray-600/30'
+                  }`}
+                >
+                  U
+                </button>
+              </div>
             </div>
           </div>
         );
@@ -314,20 +355,33 @@ export default function ComponentProperties({ component, onUpdate, onRemove }) {
       case 'spacer':
         return (
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Hauteur
+            <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
+              Hauteur de l'espacement
             </label>
-            <select
-              value={component.data.height || '20px'}
-              onChange={(e) => onUpdate({ height: e.target.value })}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            >
-              <option value="10px">10px</option>
-              <option value="20px">20px</option>
-              <option value="30px">30px</option>
-              <option value="40px">40px</option>
-              <option value="60px">60px</option>
-            </select>
+            <div className="space-y-3">
+              <div className="relative">
+                <input
+                  type="range"
+                  min="10"
+                  max="80"
+                  step="10"
+                  value={parseInt(component.data.height || '20')}
+                  onChange={(e) => onUpdate({ height: `${e.target.value}px` })}
+                  className="w-full h-2 bg-gradient-to-r from-gray-400 to-gray-600 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  <span>Petit</span>
+                  <span>Moyen</span>
+                  <span>Grand</span>
+                  <span>Très grand</span>
+                </div>
+              </div>
+              <div className="text-center">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300">
+                  {component.data.height || '20px'}
+                </span>
+              </div>
+            </div>
           </div>
         );
 
@@ -338,27 +392,44 @@ export default function ComponentProperties({ component, onUpdate, onRemove }) {
 
   if (!component) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <p className="text-gray-500 dark:text-gray-400 text-center">
+      <div className="text-center py-8">
+        <div className="w-16 h-16 bg-gradient-to-r from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+          <Settings className="w-8 h-8 text-gray-500 dark:text-gray-400" />
+        </div>
+        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
           Sélectionnez un composant pour modifier ses propriétés
         </p>
       </div>
     );
   }
 
+  const getComponentIcon = (type) => {
+    switch (type) {
+      case 'text': return '📝';
+      case 'image': return '🖼️';
+      case 'video': return '🎥';
+      case 'quote': return '💬';
+      case 'link': return '🔗';
+      case 'spacer': return '📏';
+      default: return '⚙️';
+    }
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+    <div>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
-          <Settings className="w-4 h-4 text-gray-600 dark:text-gray-400 mr-2" />
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-            Propriétés - {component.type}
+          <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center mr-3">
+            <span className="text-lg">{getComponentIcon(component.type)}</span>
+          </div>
+          <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">
+            Propriétés
           </h3>
         </div>
         
         <button
           onClick={onRemove}
-          className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+          className="p-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
           title="Supprimer le composant"
         >
           <Trash2 className="w-4 h-4" />
