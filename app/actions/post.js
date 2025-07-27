@@ -1,21 +1,45 @@
 "use server";
 
 import Post from "@/entities/Post";
-import { redirect } from "next/navigation";
 
 export async function createPost(data) {
   try {
-    console.log("FormData:", data);
-    const post = await Post.create({
-      author: data.pseudo,
-      text: data.text,
-      media: data.media,
+    console.log("FormData reçue:", data);
+    
+    // Support des anciens et nouveaux formats
+    const postData = {
+      author: data.author || data.pseudo, // Support des deux formats
+      text: data.text || "",
+      media: data.media || "",
       time: new Date().toISOString(),
-    });
+    };
+    
+    // Ajouter les nouveaux champs si présents
+    if (data.content_structure) {
+      postData.content_structure = data.content_structure;
+      postData.content_version = 2;
+      console.log("Structure de contenu ajoutée:", JSON.stringify(postData.content_structure, null, 2));
+    } else {
+      postData.content_version = 1;
+    }
+    
+    if (data.style_config) {
+      postData.style_config = data.style_config;
+      console.log("Configuration de style ajoutée:", JSON.stringify(postData.style_config, null, 2));
+    }
+    
+    console.log("Données finales envoyées à la base:", JSON.stringify(postData, null, 2));
+    
+    const post = await Post.create(postData);
+    console.log("Post créé avec succès:", post.post_id);
+    
+    // Retourner un indicateur de succès au lieu de rediriger
+    return { success: true, postId: post.post_id };
   } catch (error) {
-    console.error("Erreur lors de la publication d'un post", error);
-  } finally {
-    redirect("/");
+    console.error("Erreur lors de la publication d'un post:", error);
+    console.error("Stack trace:", error.stack);
+    // Relancer l'erreur pour que le client puisse la gérer
+    throw error;
   }
 }
 export async function deletePost(postId, userId) {
@@ -60,7 +84,5 @@ export async function deletePost(postId, userId) {
   } catch (error) {
     console.error("Erreur lors de la suppression du post", error);
     throw error; // Re-throw pour permettre à l'appelant de gérer l'erreur
-  } finally {
-    redirect("/");
   }
 }

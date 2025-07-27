@@ -1,5 +1,6 @@
 import { verifySession } from "@/utils/dal";
 import CreatePostPage from "../components/createPost";
+import PostEditor from "../components/editor/PostEditor";
 import { createApiUrl } from "@/utils/url";
 
 export default async function ProfilePage() {
@@ -45,5 +46,7 @@ export default async function ProfilePage() {
   }
   let data = await fetch(createApiUrl(`/api/user/${session.userId}`));
   let user = await data.json();
-  return <CreatePostPage user={user} />;
+  
+  // Utiliser le nouvel éditeur par défaut
+  return <PostEditor user={user} />;
 }

@@ -1,5 +1,5 @@
 "use client";
-import PostComponent from "../components/post";
+import ModernPost from "../components/ModernPost";
 import SearchBar from "../components/searchBar";
 
 export default function GetHomePage({ postsList = [], user }) {
@@ -57,7 +57,7 @@ export default function GetHomePage({ postsList = [], user }) {
         >
           {postsList && postsList.length > 0 ? (
             postsList.map((post) => (
-              <PostComponent
+              <ModernPost
                 key={post.post_id}
                 post={post}
               />

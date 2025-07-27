@@ -13,13 +13,34 @@ const Post = sequelize.define(
     author: {
       type: DataTypes.STRING(255),
     },
-    text: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    media: {
-      type: DataTypes.STRING(255),
+    // Nouveau : structure JSON pour le contenu modulaire
+    content_structure: {
+      type: DataTypes.JSON,
       allowNull: true,
+      comment: "Structure des composants du post"
+    },
+    // Nouveau : configuration de style global
+    style_config: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: {},
+      comment: "Configuration du style (background, theme, etc.)"
+    },
+    // Ancien champ maintenu pour compatibilité
+    text: {
+      type: DataTypes.TEXT, // Étendu pour textes plus longs
+      allowNull: true, // Maintenant optionnel
+    },
+    // Ancien champ maintenu pour compatibilité
+    media: {
+      type: DataTypes.TEXT, // Peut contenir plusieurs URLs séparées
+      allowNull: true,
+    },
+    // Nouveau : version du format
+    content_version: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
+      comment: "Version du format de contenu pour migration"
     },
     time: {
       type: DataTypes.STRING(255),
@@ -112,11 +133,34 @@ export const postService = {
         // Calculer le nombre réel de commentaires
         const commentsCount = await commentService.getCommentsCount(post.post_id);
         
+        // S'assurer que les champs JSON sont correctement parsés
+        let contentStructure = postData.content_structure;
+        if (typeof contentStructure === 'string') {
+          try {
+            contentStructure = JSON.parse(contentStructure);
+          } catch (e) {
+            console.error('Erreur lors du parsing de content_structure:', e);
+            contentStructure = null;
+          }
+        }
+        
+        let styleConfig = postData.style_config;
+        if (typeof styleConfig === 'string') {
+          try {
+            styleConfig = JSON.parse(styleConfig);
+          } catch (e) {
+            console.error('Erreur lors du parsing de style_config:', e);
+            styleConfig = {};
+          }
+        }
+        
         return {
           ...postData,
           likes: likesArray, // S'assurer que c'est un tableau
           likes_count: likesCount,
-          comments_count: commentsCount
+          comments_count: commentsCount,
+          content_structure: contentStructure,
+          style_config: styleConfig || {}
         };
       })
     );
@@ -138,12 +182,35 @@ export const postService = {
     const comments = await commentService.getCommentsByPostId(postId);
     const commentsCount = await commentService.getCommentsCount(postId);
     
+    // S'assurer que les champs JSON sont correctement parsés
+    let contentStructure = postData.content_structure;
+    if (typeof contentStructure === 'string') {
+      try {
+        contentStructure = JSON.parse(contentStructure);
+      } catch (e) {
+        console.error('Erreur lors du parsing de content_structure:', e);
+        contentStructure = null;
+      }
+    }
+    
+    let styleConfig = postData.style_config;
+    if (typeof styleConfig === 'string') {
+      try {
+        styleConfig = JSON.parse(styleConfig);
+      } catch (e) {
+        console.error('Erreur lors du parsing de style_config:', e);
+        styleConfig = {};
+      }
+    }
+    
     return {
       ...postData,
       likes: likesArray, // S'assurer que c'est un tableau
       likes_count: likesCount,
       comments: comments,
-      comments_count: commentsCount
+      comments_count: commentsCount,
+      content_structure: contentStructure,
+      style_config: styleConfig || {}
     };
   },
 };

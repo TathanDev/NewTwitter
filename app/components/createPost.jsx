@@ -17,6 +17,8 @@ import {
 
 export default function CreatePostPage({ user }) {
   const [postContent, setPostContent] = useState("");
+  const [components, setComponents] = useState([]);
+  const [styleConfig, setStyleConfig] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
   const [fileType, setFileType] = useState("");
@@ -71,6 +73,16 @@ export default function CreatePostPage({ user }) {
     setFileType("");
   };
 
+  const addComponent = (type) => {
+    const newComponent = {
+      id: `comp_${Date.now()}`,
+      type,
+      order: components.length,
+      data: {} // Ajouter la logique pour gérer les données par défaut
+    };
+    setComponents([...components, newComponent]);
+  };
+
   const handleSubmit = async () => {
     if (postContent.trim() || selectedFile) {
       let link = { url: "" };
@@ -84,13 +96,61 @@ export default function CreatePostPage({ user }) {
         });
         link = await res.json();
       }
+      
+      // Créer des composants pour le nouveau système s'il y a du contenu
+      let contentComponents = [...components];
+      
+      // Ajouter le composant de texte s'il y a du contenu texte
+      if (postContent.trim()) {
+        contentComponents.push({
+          id: `text_${Date.now()}`,
+          type: 'text',
+          order: contentComponents.length,
+          data: {
+            content: postContent,
+            formatting: {
+              fontSize: '16px',
+              lineHeight: '1.5',
+              color: 'inherit'
+            }
+          }
+        });
+      }
+      
+      // Ajouter le composant média s'il y a un fichier
+      if (selectedFile) {
+        const mediaComponent = {
+          id: `media_${Date.now()}`,
+          type: fileType === 'image' ? 'image' : 'video',
+          order: contentComponents.length,
+          data: {}
+        };
+        
+        if (fileType === 'image') {
+          mediaComponent.data = {
+            urls: [link.url || ""],
+            alt: 'Image du post'
+          };
+        } else {
+          mediaComponent.data = {
+            url: link.url || "",
+            autoplay: false
+          };
+        }
+        
+        contentComponents.push(mediaComponent);
+      }
+      
       let data = {
-        pseudo: user.pseudo_user,
-        text: postContent,
-        media: link.url || "",
+        author: user.pseudo_user,
+        content_structure: { components: contentComponents },
+        style_config: styleConfig,
+        text: postContent, // Garde la compatibilité avec l'ancien système
+        media: link.url || "", // Garde la compatibilité avec l'ancien système
       };
       createPost(data);
       setPostContent("");
+      setComponents([]);
       setSelectedFile(null);
       setFilePreview(null);
       setFileType("");

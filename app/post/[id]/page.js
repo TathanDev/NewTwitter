@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import PostComponent from "../../components/post";
+import ModernPost from "../../components/ModernPost";
 import BackButton from "../../components/BackButton";
 import CommentSection from "../../components/commentSection";
 import { notFound } from "next/navigation";
@@ -79,7 +79,7 @@ export default function PostPage({ params }) {
 
         {/* Post principal */}
         <div className="mb-8">
-          <PostComponent 
+          <ModernPost 
             post={post} 
             isDetailView={true} 
             externalCommentsCount={localCommentsCount}
