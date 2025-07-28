@@ -22,10 +22,8 @@ export async function GET(request) {
       let whereClause;
 
       if (searchTerm === "") {
-        // Si pas de terme de recherche, récupérer tous les utilisateurs
         whereClause = {};
       } else {
-        // Sinon, chercher les utilisateurs correspondants
         whereClause = {
           [Op.or]: [
             {
@@ -61,7 +59,7 @@ export async function GET(request) {
             user.pfp_user ||
             "https://ui-avatars.com/api/?name=User&background=random&color=fff&size=32",
           text: user.pseudo_user,
-          value: user.pseudo_user, // Ajouter value pour la consistance
+          value: user.pseudo_user,
         }))
       );
     }
@@ -90,11 +88,9 @@ export async function GET(request) {
     }*/
 
     if (type === "hashtags" || type === "all") {
-      // Extraction des hashtags depuis les posts avec comptage
       let whereClauseHashtags;
 
       if (searchTerm === "") {
-        // Si pas de terme de recherche, récupérer tous les posts avec hashtags
         whereClauseHashtags = {
           [Op.or]: [
             {
@@ -110,7 +106,6 @@ export async function GET(request) {
           ],
         };
       } else {
-        // Sinon, chercher les posts avec hashtags correspondants
         whereClauseHashtags = {
           [Op.or]: [
             {
@@ -127,7 +122,6 @@ export async function GET(request) {
         };
       }
 
-      // Rechercher d'abord dans TOUS les posts (sans filtrer par hashtags)
       const posts = await Post.findAll({
         attributes: ["text", "content_structure"],
         limit: 100,
@@ -140,8 +134,7 @@ export async function GET(request) {
 
       posts.forEach((post) => {
         let foundHashtags = [];
-        
-        // Extraire les hashtags de l'ancien champ text
+
         if (post.text) {
           const matches = post.text.match(hashtagRegex);
           if (matches) {
@@ -152,16 +145,13 @@ export async function GET(request) {
           }
         }
         
-        // Extraire les hashtags de la nouvelle structure de contenu
         if (post.content_structure) {
           try {
-            // D'abord essayer de traiter comme JSON string
             let contentStructure = post.content_structure;
             if (typeof contentStructure === 'string') {
               contentStructure = JSON.parse(contentStructure);
             }
             
-            // Parcourir les composants
             if (contentStructure && contentStructure.components) {
               contentStructure.components.forEach(component => {
                 if (component.type === 'text' && component.data && component.data.content) {
@@ -180,7 +170,6 @@ export async function GET(request) {
           }
         }
         
-        // Filtrer et compter les hashtags selon le terme de recherche
         foundHashtags.forEach(hashtag => {
           if (
             searchTerm === "" ||
@@ -191,9 +180,6 @@ export async function GET(request) {
         });
       });
 
-      console.log('Hashtags comptés:', hashtagCounts);
-
-      // Si aucun hashtag trouvé, ajouter des hashtags par défaut pour les tests
       if (Object.keys(hashtagCounts).length === 0 && searchTerm === "") {
         const defaultHashtags = ['javascript', 'react', 'nextjs', 'web', 'dev', 'coding', 'tech', 'programming'];
         defaultHashtags.forEach(tag => {
@@ -201,29 +187,25 @@ export async function GET(request) {
         });
       }
 
-      // Convertir en array et trier par popularité
       const hashtagSuggestions = Object.entries(hashtagCounts)
         .map(([hashtag, count]) => ({
           type: "hashtag",
           text: hashtag,
           hashtag: hashtag,
-          value: hashtag, // Ajouter value pour la consistance
+          value: hashtag, 
           count: count,
         }))
         .sort((a, b) => {
-          // Prioriser les hashtags qui commencent par la requête
           const aStartsWith = a.hashtag.startsWith(searchTerm.toLowerCase());
           const bStartsWith = b.hashtag.startsWith(searchTerm.toLowerCase());
 
           if (aStartsWith && !bStartsWith) return -1;
           if (!aStartsWith && bStartsWith) return 1;
 
-          // Ensuite trier par popularité
           return b.count - a.count;
         })
         .slice(0, 8);
 
-      console.log('Suggestions hashtags finales:', hashtagSuggestions);
       suggestions.push(...hashtagSuggestions);
     }
 

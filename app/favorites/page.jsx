@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import PostComponent from "../components/post";
+import ModernPost from "../components/ModernPost";
 import { useUser } from "../context/UserContext";
 
 export default function FavoritesPage() {
@@ -59,7 +59,7 @@ export default function FavoritesPage() {
       ) : (
         <div className="grid gap-6 pt-7">
           {favorites.map((post) => (
-            <PostComponent key={post.post_id} post={post} />
+            <ModernPost key={post.post_id} post={post} />
           ))}
         </div>
       )}

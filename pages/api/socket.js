@@ -23,31 +23,26 @@ const SocketHandler = (req, res) => {
   global.io = io; // Stocker l'instance dans global pour y accéder depuis les APIs
 
   io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.id}`);
 
     // Join user to their personal room
     socket.on('join-user', (userId) => {
       socket.join(`user-${userId}`);
       socket.userId = userId;
-      console.log(`User ${userId} joined personal room`);
     });
 
     // Join specific conversation
     socket.on('join-conversation', (conversationId) => {
       socket.join(conversationId);
-      console.log(`User joined conversation: ${conversationId}`);
     });
 
     // Leave conversation
     socket.on('leave-conversation', (conversationId) => {
       socket.leave(conversationId);
-      console.log(`User left conversation: ${conversationId}`);
     });
 
     // Handle new message
     socket.on('send-message', async (messageData) => {
       try {
-        console.log('Received message:', messageData);
         
         const { senderId, receiverId, content, messageType = 'text', mediaUrl = null } = messageData;
 
@@ -88,10 +83,6 @@ const SocketHandler = (req, res) => {
         const unreadCount = await messageService.getUnreadCount(parseInt(receiverId));
         io.to(`user-${receiverId}`).emit('unread-count-update', { unreadCount });
 
-
-        console.log(`Message sent in conversation ${conversationId}`);
-        console.log(`Unread count for user ${receiverId}: ${unreadCount}`);
-
         // Confirm to sender
         socket.emit('message-sent', { success: true, message: messageToSend });
 
@@ -113,8 +104,6 @@ const SocketHandler = (req, res) => {
           readByUserId: userId,
           readAt: new Date()
         });
-        
-        console.log(`Messages marked as read by user ${userId} in ${conversationId}`);
       } catch (error) {
         console.error('Error marking messages as read:', error);
       }
@@ -131,9 +120,6 @@ const SocketHandler = (req, res) => {
       socket.to(conversationId).emit('user-stop-typing', { userId });
     });
 
-    socket.on('disconnect', () => {
-      console.log(`User disconnected: ${socket.id}`);
-    });
   });
 
   res.end();

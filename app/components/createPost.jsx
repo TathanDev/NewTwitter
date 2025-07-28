@@ -19,9 +19,9 @@ export default function CreatePostPage({ user }) {
   const [postContent, setPostContent] = useState("");
   const [components, setComponents] = useState([]);
   const [styleConfig, setStyleConfig] = useState({});
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [filePreview, setFilePreview] = useState(null);
-  const [fileType, setFileType] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [filePreviews, setFilePreviews] = useState([]);
+  const [fileTypes, setFileTypes] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -33,29 +33,38 @@ export default function CreatePostPage({ user }) {
   };
 
   const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    processFile(file);
+    const files = Array.from(event.target.files);
+    processFiles(files);
   };
 
-  const processFile = (file) => {
-    if (file) {
-      setSelectedFile(file);
-      const type = file.type.startsWith("image/") ? "image" : "video";
-      setFileType(type);
+  const processFiles = (files) => {
+    if (files && files.length > 0) {
+      setSelectedFiles(files);
+      const types = files.map(file => file.type.startsWith("image/") ? "image" : "video");
+      setFileTypes(types);
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFilePreview(e.target.result);
-      };
-      reader.readAsDataURL(file);
+      const previews = [];
+      let loadedCount = 0;
+      
+      files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previews[index] = e.target.result;
+          loadedCount++;
+          if (loadedCount === files.length) {
+            setFilePreviews([...previews]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
     }
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
     setIsDragOver(false);
-    const file = event.dataTransfer.files[0];
-    processFile(file);
+    const files = Array.from(event.dataTransfer.files);
+    processFiles(files);
   };
 
   const handleDragOver = (event) => {
@@ -67,10 +76,16 @@ export default function CreatePostPage({ user }) {
     setIsDragOver(false);
   };
 
-  const removeFile = () => {
-    setSelectedFile(null);
-    setFilePreview(null);
-    setFileType("");
+  const removeFile = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setFilePreviews(prev => prev.filter((_, i) => i !== index));
+    setFileTypes(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeAllFiles = () => {
+    setSelectedFiles([]);
+    setFilePreviews([]);
+    setFileTypes([]);
   };
 
   const addComponent = (type) => {
@@ -84,17 +99,28 @@ export default function CreatePostPage({ user }) {
   };
 
   const handleSubmit = async () => {
-    if (postContent.trim() || selectedFile) {
-      let link = { url: "" };
-      if (selectedFile) {
-        const res = await fetch("/api/postMedia", {
-          method: "POST",
-          body: selectedFile,
-          headers: {
-            "x-filename": selectedFile.name,
-          },
+    if (postContent.trim() || selectedFiles.length > 0) {
+      let uploadedFiles = [];
+      
+      // Upload tous les fichiers sélectionnés
+      if (selectedFiles.length > 0) {
+        const formData = new FormData();
+        selectedFiles.forEach(file => {
+          formData.append('files', file);
         });
-        link = await res.json();
+        
+        try {
+          const res = await fetch("/api/media/batch", {
+            method: "POST",
+            body: formData,
+          });
+          const result = await res.json();
+          if (result.success && result.files) {
+            uploadedFiles = result.files;
+          }
+        } catch (error) {
+          console.error('Erreur lors de l\'upload des fichiers:', error);
+        }
       }
       
       // Créer des composants pour le nouveau système s'il y a du contenu
@@ -117,28 +143,46 @@ export default function CreatePostPage({ user }) {
         });
       }
       
-      // Ajouter le composant média s'il y a un fichier
-      if (selectedFile) {
-        const mediaComponent = {
-          id: `media_${Date.now()}`,
-          type: fileType === 'image' ? 'image' : 'video',
-          order: contentComponents.length,
-          data: {}
-        };
+      // Ajouter les composants média pour chaque fichier uploadé
+      if (uploadedFiles.length > 0) {
+        // Séparer les images et les vidéos
+        const images = uploadedFiles.filter(file => file.type.startsWith('image/'));
+        const videos = uploadedFiles.filter(file => file.type.startsWith('video/'));
         
-        if (fileType === 'image') {
-          mediaComponent.data = {
-            urls: [link.url || ""],
-            alt: 'Image du post'
+        // Créer un composant media avec toutes les images
+        if (images.length > 0) {
+          const imageComponent = {
+            id: `images_${Date.now()}`,
+            type: 'media',
+            order: contentComponents.length,
+            data: {
+              type: 'image',
+              urls: images.map(img => img.url),
+              alt: 'Images du post',
+              layout: 'multiple',
+              aspectRatio: '16:9'
+            }
           };
-        } else {
-          mediaComponent.data = {
-            url: link.url || "",
-            autoplay: false
-          };
+          contentComponents.push(imageComponent);
         }
         
-        contentComponents.push(mediaComponent);
+        // Créer des composants vidéo séparés (une vidéo par composant)
+        videos.forEach((video, index) => {
+          const videoComponent = {
+            id: `video_${Date.now()}_${index}`,
+            type: 'media',
+            order: contentComponents.length,
+            data: {
+              type: 'video',
+              url: video.url,
+              urls: [video.url],
+              autoplay: false,
+              layout: 'single',
+              aspectRatio: '16:9'
+            }
+          };
+          contentComponents.push(videoComponent);
+        });
       }
       
       let data = {
@@ -146,14 +190,14 @@ export default function CreatePostPage({ user }) {
         content_structure: { components: contentComponents },
         style_config: styleConfig,
         text: postContent, // Garde la compatibilité avec l'ancien système
-        media: link.url || "", // Garde la compatibilité avec l'ancien système
+        media: uploadedFiles.length > 0 ? uploadedFiles[0].url : "", // Garde la compatibilité avec l'ancien système
       };
       createPost(data);
       setPostContent("");
       setComponents([]);
-      setSelectedFile(null);
-      setFilePreview(null);
-      setFileType("");
+      setSelectedFiles([]);
+      setFilePreviews([]);
+      setFileTypes([]);
     }
   };
 
@@ -189,22 +233,26 @@ export default function CreatePostPage({ user }) {
       )}
 
       {/* Média du post */}
-      {filePreview && (
+      {filePreviews.length > 0 && (
         <div className="px-6 pb-4">
-          <div className="w-full rounded-xl overflow-hidden">
-            {fileType === "image" ? (
-              <img
-                src={filePreview}
-                alt="Aperçu"
-                className="w-full h-64 object-cover"
-              />
-            ) : (
-              <video
-                src={filePreview}
-                className="w-full h-64 object-cover"
-                controls
-              />
-            )}
+          <div className="space-y-2">
+            {filePreviews.map((preview, index) => (
+              <div key={index} className="w-full rounded-xl overflow-hidden">
+                {fileTypes[index] === "image" ? (
+                  <img
+                    src={preview}
+                    alt={`Aperçu ${index + 1}`}
+                    className="w-full h-64 object-cover"
+                  />
+                ) : (
+                  <video
+                    src={preview}
+                    className="w-full h-64 object-cover"
+                    controls
+                  />
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -325,7 +373,7 @@ export default function CreatePostPage({ user }) {
                 Médias
               </h2>
 
-              {!selectedFile ? (
+            {selectedFiles.length === 0 ? (
                 <div
                   className={`border-2 border-dashed rounded-2xl p-4 md:p-8 text-center transition-all duration-300 ${
                     isDragOver
@@ -338,17 +386,18 @@ export default function CreatePostPage({ user }) {
                 >
                   <Upload className="w-8 md:w-12 h-8 md:h-12 mx-auto mb-4 text-gray-400" />
                   <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-2">
-                    Glissez-déposez une image ou vidéo ici
+                    Glissez-déposez des images ou vidéos ici
                   </p>
                   <p className="text-xs md:text-sm text-gray-500 dark:text-gray-500 mb-4">
                     ou
                   </p>
                   <label className="inline-flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 cursor-pointer text-sm md:text-base">
                     <Upload className="w-4 md:w-5 h-4 md:h-5" />
-                    Choisir un fichier
+                    Choisir des fichiers
                     <input
                       type="file"
                       accept="image/*,video/*"
+                      multiple
                       onChange={handleFileSelect}
                       className="hidden"
                     />
@@ -356,28 +405,53 @@ export default function CreatePostPage({ user }) {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-600">
+                  <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-600">
                     <div className="flex items-center gap-3">
-                      {fileType === "image" ? (
-                        <Upload className="w-6 h-6 text-blue-500" />
-                      ) : (
-                        <Video className="w-6 h-6 text-purple-500" />
-                      )}
+                      <Upload className="w-6 h-6 text-blue-500" />
                       <div>
                         <p className="font-medium text-gray-900 dark:text-gray-100">
-                          {selectedFile.name}
+                          {selectedFiles.length} fichier{selectedFiles.length > 1 ? 's' : ''} sélectionné{selectedFiles.length > 1 ? 's' : ''}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                          {(selectedFiles.reduce((total, file) => total + file.size, 0) / 1024 / 1024).toFixed(2)} MB total
                         </p>
                       </div>
                     </div>
                     <button
-                      onClick={removeFile}
+                      onClick={removeAllFiles}
                       className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all duration-200"
                     >
                       <X className="w-5 h-5" />
                     </button>
+                  </div>
+                  
+                  {/* Liste des fichiers individuels */}
+                  <div className="space-y-2">
+                    {selectedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                        <div className="flex items-center gap-2">
+                          {fileTypes[index] === "image" ? (
+                            <Upload className="w-4 h-4 text-blue-500" />
+                          ) : (
+                            <Video className="w-4 h-4 text-purple-500" />
+                          )}
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px]">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => removeFile(index)}
+                          className="p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 rounded transition-all duration-200"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -387,7 +461,7 @@ export default function CreatePostPage({ user }) {
             <div className="lg:hidden">
               <button
                 onClick={handleSubmit}
-                disabled={!postContent.trim() && !selectedFile}
+                disabled={!postContent.trim() && selectedFiles.length === 0}
                 className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-5 h-5" />
@@ -403,7 +477,7 @@ export default function CreatePostPage({ user }) {
                 Aperçu en temps réel
               </h2>
 
-              {postContent.trim() || selectedFile ? (
+              {postContent.trim() || selectedFiles.length > 0 ? (
                 <PostPreview />
               ) : (
                 <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-8 md:p-12 text-center">
@@ -423,7 +497,7 @@ export default function CreatePostPage({ user }) {
               <div className="hidden lg:block mt-6">
                 <button
                   onClick={handleSubmit}
-                  disabled={!postContent.trim() && !selectedFile}
+                  disabled={!postContent.trim() && selectedFiles.length === 0}
                   className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-2xl hover:from-blue-700 hover:to-purple-700 dark:hover:from-blue-600 dark:hover:to-purple-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-5 h-5" />

@@ -138,14 +138,6 @@ export default function PostEditor({ user, onClose }) {
         media: ""
       };
 
-      // Logs de débogage
-      console.log("=== DONNÉES DE PUBLICATION ===");
-      console.log("Nombre de composants:", components.length);
-      console.log("Composants:", components);
-      console.log("Configuration de style:", styleConfig);
-      console.log("Données complètes du post:", postData);
-      console.log("JSON stringifié:", JSON.stringify(postData, null, 2));
-      console.log("================================");
 
       const response = await createPost(postData);
       

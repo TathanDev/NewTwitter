@@ -18,16 +18,120 @@ const ComponentRenderer = ({ component }) => {
         </div>
       );
 
+    case 'media':
     case 'image':
-      return component.data.urls?.[0] ? (
-        <div className="w-full rounded-xl overflow-hidden">
-          <img
-            src={component.data.urls[0]}
-            alt={component.data.alt || 'Image'}
-            className="w-full h-auto object-cover"
-          />
+      // Gérer le type 'media' et 'image' de la même façon
+      const mediaType = component.data.type || 'image';
+      
+      if (mediaType === 'video') {
+        const videoUrl = component.data.url || (component.data.urls && component.data.urls[0]);
+        return videoUrl ? (
+          <div className="w-full rounded-xl overflow-hidden">
+            <video
+              src={videoUrl}
+              className="w-full h-auto object-cover"
+              controls
+              autoPlay={component.data.autoplay}
+            />
+          </div>
+        ) : null;
+      }
+      
+      // Pour les images
+      const urls = component.data.urls || [];
+      if (urls.length === 0) return null;
+      
+      // Si une seule image, affichage simple
+      if (urls.length === 1) {
+        return (
+          <div className="w-full rounded-xl overflow-hidden">
+            <img
+              src={urls[0]}
+              alt={component.data.alt || 'Image'}
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        );
+      }
+      
+      // Si plusieurs images, affichage en grille
+      return (
+        <div className="w-full space-y-2">
+          {urls.length === 2 && (
+            <div className="grid grid-cols-2 gap-2">
+              {urls.map((url, index) => (
+                <div key={index} className="rounded-xl overflow-hidden">
+                  <img
+                    src={url}
+                    alt={`${component.data.alt || 'Image'} ${index + 1}`}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          {urls.length === 3 && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-xl overflow-hidden">
+                <img
+                  src={urls[0]}
+                  alt={`${component.data.alt || 'Image'} 1`}
+                  className="w-full h-96 object-cover"
+                />
+              </div>
+              <div className="grid grid-rows-2 gap-2">
+                {urls.slice(1).map((url, index) => (
+                  <div key={index + 1} className="rounded-xl overflow-hidden">
+                    <img
+                      src={url}
+                      alt={`${component.data.alt || 'Image'} ${index + 2}`}
+                      className="w-full h-[11.5rem] object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {urls.length === 4 && (
+            <div className="grid grid-cols-2 gap-2">
+              {urls.map((url, index) => (
+                <div key={index} className="rounded-xl overflow-hidden">
+                  <img
+                    src={url}
+                    alt={`${component.data.alt || 'Image'} ${index + 1}`}
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          {urls.length > 4 && (
+            <div className="grid grid-cols-2 gap-2">
+              {urls.slice(0, 3).map((url, index) => (
+                <div key={index} className={`rounded-xl overflow-hidden ${index === 0 ? 'col-span-2' : ''}`}>
+                  <img
+                    src={url}
+                    alt={`${component.data.alt || 'Image'} ${index + 1}`}
+                    className={`w-full object-cover ${index === 0 ? 'h-64' : 'h-32'}`}
+                  />
+                </div>
+              ))}
+              <div className="relative rounded-xl overflow-hidden">
+                <img
+                  src={urls[3]}
+                  alt={`${component.data.alt || 'Image'} 4`}
+                  className="w-full h-32 object-cover"
+                />
+                {urls.length > 4 && (
+                  <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                    <span className="text-white text-2xl font-bold">+{urls.length - 4}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-      ) : null;
+      );
 
     case 'video':
       return component.data.url ? (
@@ -386,7 +490,13 @@ export default function ModernPost({ post, isDetailView = false, onCommentsCount
   const canDeletePost = currentUser?.id_user && author && author.id_user === currentUser.id_user;
   
   // Vérifier si c'est un post legacy ou moderne
-  const isLegacyPost = !post.content_structure || post.content_version === 1;
+  // Un post est considéré comme moderne s'il a une content_structure valide
+  const hasModernContent = post.content_structure && 
+    post.content_structure.components && 
+    Array.isArray(post.content_structure.components) && 
+    post.content_structure.components.length > 0;
+  
+  const isLegacyPost = !hasModernContent;
   
   // Si c'est un post legacy, utiliser l'affichage classique
   if (isLegacyPost) {
