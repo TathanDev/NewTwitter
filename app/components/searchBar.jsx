@@ -22,13 +22,22 @@ export default function SearchBar() {
 
   // Gestion de l'autocomplétion
   useEffect(() => {
-    if (searchQuery.length > 0) {
+    console.log('SearchBar: searchQuery changed:', searchQuery, 'selectedFilter:', selectedFilter);
+    if (searchQuery.length >= 0) { // Permettre les recherches vides
       getSuggestions(searchQuery, selectedFilter);
       setShowSuggestions(true);
     } else {
       setShowSuggestions(false);
     }
   }, [searchQuery, selectedFilter, getSuggestions]);
+
+  // Afficher les suggestions quand elles arrivent
+  useEffect(() => {
+    console.log('SearchBar: suggestions updated:', suggestions.length, suggestions);
+    if (suggestions.length > 0) {
+      setShowSuggestions(true);
+    }
+  }, [suggestions]);
 
   // Fermer les suggestions en cliquant ailleurs
   useEffect(() => {
@@ -87,36 +96,31 @@ export default function SearchBar() {
           <div className="flex-1 relative" ref={searchRef}>
             {/* Suggestions dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className=" bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-600/50 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto">
-                {suggestions.map(
-                  (suggestion, index) => (
-                    console.log(suggestion),
-                    (
-                      <button
-                        key={`${suggestion.type}-${suggestion.id || index}`}
-                        onClick={() => handleSuggestionClick(suggestion)}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl"
-                      >
-                        {suggestion.type === "user" && (
-                          <img
-                            src={suggestion.pfp_user}
-                            alt=""
-                            className="w-6 h-6 rounded-full"
-                          />
-                        )}
-                        {suggestion.type === "hashtag" && (
-                          <span className="text-blue-500">#</span>
-                        )}
-                        <span className="text-sm text-gray-900 dark:text-gray-100">
-                          {suggestion.text}
-                        </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
-                          {suggestion.type}
-                        </span>
-                      </button>
-                    )
-                  )
-                )}
+              <div className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-600/50 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto">
+                {suggestions.map((suggestion, index) => (
+                  <button
+                    key={`${suggestion.type}-${suggestion.id || index}`}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 first:rounded-t-xl last:rounded-b-xl"
+                  >
+                    {suggestion.type === "user" && (
+                      <img
+                        src={suggestion.pfp_user}
+                        alt=""
+                        className="w-6 h-6 rounded-full"
+                      />
+                    )}
+                    {suggestion.type === "hashtag" && (
+                      <span className="text-blue-500">#</span>
+                    )}
+                    <span className="text-sm text-gray-900 dark:text-gray-100">
+                      {suggestion.text}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                      {suggestion.type}
+                    </span>
+                  </button>
+                ))}
               </div>
             )}
             <div className="relative">
@@ -138,7 +142,15 @@ export default function SearchBar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                onFocus={() => searchQuery && setShowSuggestions(true)}
+                onFocus={() => {
+                  console.log('SearchBar: onFocus, searchQuery:', searchQuery, 'suggestions:', suggestions.length);
+                  if (suggestions.length > 0) {
+                    setShowSuggestions(true);
+                  } else {
+                    // Trigger a new search to get suggestions
+                    getSuggestions(searchQuery, selectedFilter);
+                  }
+                }}
                 placeholder="Rechercher sur NewT..."
                 className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300/50 dark:border-gray-600/50 rounded-xl text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 shadow-sm hover:shadow-md"
               />

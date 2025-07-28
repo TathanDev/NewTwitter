@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import PostComponent from "./post";
+import ModernPost from './ModernPost';
 
 export default function UserPosts({ userId, username }) {
   const [posts, setPosts] = useState([]);
@@ -87,7 +87,7 @@ export default function UserPosts({ userId, username }) {
 
       <div className="space-y-4">
         {posts.map((post) => (
-          <PostComponent
+          <ModernPost
             key={post.post_id}
             post={post}
             isDetailView={false}

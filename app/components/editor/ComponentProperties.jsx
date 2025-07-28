@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Settings, Trash2, Edit3 } from "lucide-react";
+import MentionAutocomplete from '../MentionAutocomplete';
 
 export default function ComponentProperties({ component, onUpdate, onRemove }) {
   const [activeTab, setActiveTab] = useState('content');
@@ -16,17 +17,17 @@ export default function ComponentProperties({ component, onUpdate, onRemove }) {
               </label>
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-400 dark:to-purple-400 rounded-2xl blur opacity-20 group-focus-within:opacity-50 transition duration-300"></div>
-                <textarea
+                <MentionAutocomplete
                   value={component.data.content || ''}
-                  onChange={(e) => onUpdate({ content: e.target.value })}
+                  onChange={(value) => onUpdate({ content: value })}
                   className="relative w-full py-3 px-4 text-base text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 rounded-2xl border border-gray-300/50 dark:border-gray-600/30 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 focus:border-transparent transition-all duration-300 shadow-lg hover:shadow-xl resize-none"
                   rows={3}
-                  placeholder="Tapez votre texte ici..."
+                  placeholder="Tapez votre texte ici... Utilisez @ pour mentionner ou # pour les hashtags"
                 />
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2">
                   Couleur du texte
@@ -159,87 +160,208 @@ export default function ComponentProperties({ component, onUpdate, onRemove }) {
           </div>
         );
 
-      case 'image':
+      case 'media':
         return (
-          <div className="space-y-3">
+          <div className="space-y-4">
+            {/* Sélecteur de type de média */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Uploader une image
+              <label className="block text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
+                Type de média
               </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const formData = new FormData();
-                    formData.append('files', file);
-                    
-                    try {
-                      const response = await fetch('/api/media/batch', {
-                        method: 'POST',
-                        body: formData
-                      });
-                      
-                      if (response.ok) {
-                        const result = await response.json();
-                        if (result.files && result.files.length > 0) {
-                          onUpdate({ urls: [result.files[0].url] });
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => onUpdate({ type: 'image' })}
+                  className={`flex-1 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                    component.data.type === 'image'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                  }`}
+                >
+                  🖼️ Image
+                </button>
+                <button
+                  onClick={() => onUpdate({ type: 'video' })}
+                  className={`flex-1 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                    component.data.type === 'video'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                  }`}
+                >
+                  🎥 Vidéo
+                </button>
+              </div>
+            </div>
+
+            {/* Configuration pour les images */}
+            {component.data.type === 'image' && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Uploader une image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const formData = new FormData();
+                        formData.append('files', file);
+                        
+                        try {
+                          const response = await fetch('/api/media/batch', {
+                            method: 'POST',
+                            body: formData
+                          });
+                          
+                          if (response.ok) {
+                            const result = await response.json();
+                            if (result.files && result.files.length > 0) {
+                              onUpdate({ urls: [result.files[0].url] });
+                            }
+                          }
+                        } catch (error) {
+                          console.error('Erreur lors de l\'upload:', error);
                         }
                       }
-                    } catch (error) {
-                      console.error('Erreur lors de l\'upload:', error);
-                    }
-                  }
-                }}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              />
-            </div>
-            
-            <div className="text-center text-gray-500 text-sm">
-              ou
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                URL de l'image
-              </label>
-              <input
-                type="url"
-                value={component.data.urls?.[0] || ''}
-                onChange={(e) => onUpdate({ urls: [e.target.value] })}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Texte alternatif
-              </label>
-              <input
-                type="text"
-                value={component.data.alt || ''}
-                onChange={(e) => onUpdate({ alt: e.target.value })}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                placeholder="Description de l'image"
-              />
-            </div>
-            
-            {/* Aperçu de l'image */}
-            {component.data.urls?.[0] && (
-              <div className="mt-3">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Aperçu
-                </label>
-                <img
-                  src={component.data.urls[0]}
-                  alt={component.data.alt || 'Aperçu'}
-                  className="w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
+                    }}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
+                
+                <div className="text-center text-gray-500 text-sm">
+                  ou
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    URL de l'image
+                  </label>
+                  <input
+                    type="url"
+                    value={component.data.urls?.[0] || ''}
+                    onChange={(e) => onUpdate({ urls: [e.target.value] })}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Texte alternatif
+                  </label>
+                  <input
+                    type="text"
+                    value={component.data.alt || ''}
+                    onChange={(e) => onUpdate({ alt: e.target.value })}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    placeholder="Description de l'image"
+                  />
+                </div>
+                
+                {/* Aperçu de l'image */}
+                {component.data.urls?.[0] && (
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Aperçu
+                    </label>
+                    <img
+                      src={component.data.urls[0]}
+                      alt={component.data.alt || 'Aperçu'}
+                      className="w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Configuration pour les vidéos */}
+            {component.data.type === 'video' && (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Uploader une vidéo
+                  </label>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={async (e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const formData = new FormData();
+                        formData.append('files', file);
+                        
+                        try {
+                          const response = await fetch('/api/media/batch', {
+                            method: 'POST',
+                            body: formData
+                          });
+                          
+                          if (response.ok) {
+                            const result = await response.json();
+                            if (result.files && result.files.length > 0) {
+                              onUpdate({ url: result.files[0].url });
+                            }
+                          }
+                        } catch (error) {
+                          console.error('Erreur lors de l\'upload:', error);
+                        }
+                      }
+                    }}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
+                  />
+                </div>
+                
+                <div className="text-center text-gray-500 text-sm">
+                  ou
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    URL de la vidéo
+                  </label>
+                  <input
+                    type="url"
+                    value={component.data.url || ''}
+                    onChange={(e) => onUpdate({ url: e.target.value })}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    placeholder="https://example.com/video.mp4"
+                  />
+                </div>
+                
+                <div>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={component.data.autoplay || false}
+                      onChange={(e) => onUpdate({ autoplay: e.target.checked })}
+                      className="rounded border-gray-300 dark:border-gray-600"
+                    />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Lecture automatique
+                    </span>
+                  </label>
+                </div>
+                
+                {/* Aperçu de la vidéo */}
+                {component.data.url && (
+                  <div className="mt-3">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Aperçu
+                    </label>
+                    <video
+                      src={component.data.url}
+                      controls
+                      className="w-full h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -252,12 +374,12 @@ export default function ComponentProperties({ component, onUpdate, onRemove }) {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Citation
               </label>
-              <textarea
+              <MentionAutocomplete
                 value={component.data.text || ''}
-                onChange={(e) => onUpdate({ text: e.target.value })}
+                onChange={(value) => onUpdate({ text: value })}
                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 rows={3}
-                placeholder="Votre citation inspirante..."
+                placeholder="Votre citation inspirante... Utilisez @ ou # si nécessaire"
               />
             </div>
             
@@ -309,12 +431,12 @@ export default function ComponentProperties({ component, onUpdate, onRemove }) {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description
               </label>
-              <textarea
+              <MentionAutocomplete
                 value={component.data.description || ''}
-                onChange={(e) => onUpdate({ description: e.target.value })}
+                onChange={(value) => onUpdate({ description: value })}
                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 rows={2}
-                placeholder="Description optionnelle du lien"
+                placeholder="Description optionnelle du lien... Utilisez @ ou # si nécessaire"
               />
             </div>
           </div>
@@ -406,8 +528,7 @@ export default function ComponentProperties({ component, onUpdate, onRemove }) {
   const getComponentIcon = (type) => {
     switch (type) {
       case 'text': return '📝';
-      case 'image': return '🖼️';
-      case 'video': return '🎥';
+      case 'media': return '🎬';
       case 'quote': return '💬';
       case 'link': return '🔗';
       case 'spacer': return '📏';

@@ -21,18 +21,16 @@ const getDefaultData = (type) => {
           textAlign: "left"
         }
       };
-    case 'image':
+    case 'media':
       return {
-        urls: [],
+        type: "image", // "image" ou "video"
+        urls: [], // Pour les images
+        url: "", // Pour les vidéos
         alt: "",
+        thumbnail: "",
+        autoplay: false,
         layout: "single",
         aspectRatio: "16:9"
-      };
-    case 'video':
-      return {
-        url: "",
-        thumbnail: "",
-        autoplay: false
       };
     case 'quote':
       return {

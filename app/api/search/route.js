@@ -3,6 +3,7 @@ import { Op } from "sequelize";
 import Post from "@/entities/Post";
 import User from "@/entities/User";
 import Comment from "@/entities/Comment";
+import { matchesSearchTerm, containsHashtag } from "../../utils/searchUtils.js";
 
 export async function GET(request) {
   try {
@@ -62,27 +63,18 @@ export async function GET(request) {
   }
 }
 
-// Fonction de recherche de posts
+
+// Fonction de recherche de posts améliorée
 async function searchPosts(searchTerm, limit, offset) {
-  // Rechercher dans les posts directement
-  const { count: postsCount, rows: directPosts } = await Post.findAndCountAll({
-    where: {
-      [Op.or]: [
-        {
-          text: {
-            [Op.like]: `%${searchTerm}%`, // SQLite utilise LIKE
-          },
-        },
-        {
-          author: {
-            [Op.like]: `%${searchTerm}%`,
-          },
-        },
-      ],
-    },
-    order: [["time", "DESC"]],
-    limit: Math.ceil(limit / 2),
-    offset,
+  // Importer postService
+  const { postService } = await import("@/entities/Post");
+  
+  // Récupérer tous les posts avec le formatage correct
+  const allPosts = await postService.getPostsWithLikesCount();
+
+  // Filtrer les posts qui correspondent au terme de recherche
+  const matchingPosts = allPosts.filter(post => {
+    return matchesSearchTerm(post, searchTerm);
   });
 
   // Rechercher dans les commentaires et récupérer les posts correspondants
@@ -108,33 +100,25 @@ async function searchPosts(searchTerm, limit, offset) {
         },
       ],
     },
-    limit: Math.floor(limit / 2),
     order: [["time", "DESC"]],
   });
 
-  // Récupérer les posts des commentaires trouvés
+  // Récupérer les posts des commentaires trouvés avec formatage correct
   const postIdsFromComments = [...new Set(commentsWithPosts.map(comment => comment.post_id))];
-  const postsFromComments = postIdsFromComments.length > 0 ? await Post.findAll({
-    where: {
-      post_id: {
-        [Op.in]: postIdsFromComments,
-      },
-    },
-    order: [["time", "DESC"]],
-  }) : [];
+  const postsFromComments = postIdsFromComments.length > 0 
+    ? allPosts.filter(post => postIdsFromComments.includes(post.post_id))
+    : [];
 
   // Combiner les résultats en évitant les doublons
   const allPostIds = new Set();
-  const combinedPosts = [];
-  
+  const combinedPosts = [];  
   // Ajouter les posts directs
-  directPosts.forEach(post => {
+  matchingPosts.forEach(post => {
     if (!allPostIds.has(post.post_id)) {
       allPostIds.add(post.post_id);
       combinedPosts.push(post);
     }
-  });
-  
+  });  
   // Ajouter les posts des commentaires
   postsFromComments.forEach(post => {
     if (!allPostIds.has(post.post_id)) {
@@ -146,8 +130,8 @@ async function searchPosts(searchTerm, limit, offset) {
   // Trier par date décroissante
   combinedPosts.sort((a, b) => new Date(b.time) - new Date(a.time));
 
-  const totalCount = postsCount + postIdsFromComments.length;
-  const finalPosts = combinedPosts.slice(0, limit);
+  const totalCount = combinedPosts.length;
+  const finalPosts = combinedPosts.slice(offset, offset + limit);
 
   return {
     posts: finalPosts,
@@ -228,31 +212,33 @@ async function searchComments(searchTerm, limit, offset) {
   };
 }
 
-// Fonction de recherche de hashtags (dans le texte des posts)
+// Fonction de recherche de hashtags améliorée
 async function searchHashtags(searchTerm, limit, offset) {
-  // Rechercher les posts contenant le hashtag
   const hashtagPattern = searchTerm.startsWith("#")
     ? searchTerm
     : `#${searchTerm}`;
 
-  const { count, rows } = await Post.findAndCountAll({
-    where: {
-      text: {
-        [Op.like]: `%${hashtagPattern}%`,
-      },
-    },
-    order: [["time", "DESC"]],
-    limit,
-    offset,
+  // Importer postService
+  const { postService } = await import("@/entities/Post");
+  
+  // Récupérer tous les posts avec le formatage correct
+  const allPosts = await postService.getPostsWithLikesCount();
+
+  // Filtrer les posts qui contiennent le hashtag
+  const matchingPosts = allPosts.filter(post => {
+    return containsHashtag(post, hashtagPattern);
   });
 
+  const totalCount = matchingPosts.length;
+  const finalPosts = matchingPosts.slice(offset, offset + limit);
+
   return {
-    posts: rows,
+    posts: finalPosts,
     hashtag: hashtagPattern,
-    total: count,
-    hasMore: offset + limit < count,
+    total: totalCount,
+    hasMore: offset + limit < totalCount,
     currentPage: Math.floor(offset / limit) + 1,
-    totalPages: Math.ceil(count / limit),
+    totalPages: Math.ceil(totalCount / limit),
   };
 }
 

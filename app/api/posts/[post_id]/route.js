@@ -10,6 +10,11 @@ export async function GET(request, { params }) {
   try {
     const { post_id } = await params;
     
+    // Valider que post_id est un nombre
+    if (!post_id || isNaN(post_id) || !Number.isInteger(Number(post_id))) {
+      return NextResponse.json({ error: "Post ID invalide" }, { status: 400 });
+    }
+    
     // Récupérer le post directement depuis la base de données
     const post = await postService.getPostWithComments(post_id);
     
@@ -29,6 +34,11 @@ export async function POST(request, { params }) {
   try {
     const { post_id } = await params;
     const { userId } = await request.json();
+    
+    // Valider que post_id est un nombre
+    if (!post_id || isNaN(post_id) || !Number.isInteger(Number(post_id))) {
+      return NextResponse.json({ error: "Post ID invalide" }, { status: 400 });
+    }
     
     // Vérifier l'authentification
     const session = await verifySession();
@@ -79,6 +89,11 @@ export async function DELETE(request, { params }) {
   try {
     const { post_id } = await params;
     const { userId } = await request.json();
+    
+    // Valider que post_id est un nombre
+    if (!post_id || isNaN(post_id) || !Number.isInteger(Number(post_id))) {
+      return NextResponse.json({ error: "Post ID invalide" }, { status: 400 });
+    }
     
     // Vérifier l'authentification
     const session = await verifySession();

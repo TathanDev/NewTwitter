@@ -44,31 +44,39 @@ export default function DraggableComponent({
           </div>
         );
 
-      case 'image':
-        return component.data.urls?.[0] ? (
-          <img
-            src={component.data.urls[0]}
-            alt={component.data.alt || 'Image'}
-            className="w-full h-auto rounded"
-          />
-        ) : (
-          <div className="w-full h-32 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
-            <span className="text-gray-500">Aucune image</span>
-          </div>
-        );
-
-      case 'video':
-        return component.data.url ? (
-          <video
-            src={component.data.url}
-            controls
-            className="w-full h-auto rounded"
-          />
-        ) : (
-          <div className="w-full h-32 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
-            <span className="text-gray-500">Aucune vidéo</span>
-          </div>
-        );
+      case 'media':
+        if (component.data.type === 'image') {
+          return component.data.urls?.[0] ? (
+            <img
+              src={component.data.urls[0]}
+              alt={component.data.alt || 'Image'}
+              className="w-full h-auto rounded"
+            />
+          ) : (
+            <div className="w-full h-32 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+              <span className="text-gray-500">Aucune image</span>
+            </div>
+          );
+        } else if (component.data.type === 'video') {
+          return component.data.url ? (
+            <video
+              src={component.data.url}
+              controls
+              className="w-full h-auto rounded"
+              autoPlay={component.data.autoplay}
+            />
+          ) : (
+            <div className="w-full h-32 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+              <span className="text-gray-500">Aucune vidéo</span>
+            </div>
+          );
+        } else {
+          return (
+            <div className="w-full h-32 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center">
+              <span className="text-gray-500">Sélectionnez un type de média</span>
+            </div>
+          );
+        }
 
       case 'quote':
         return (

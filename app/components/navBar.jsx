@@ -139,7 +139,7 @@ export default async function NavBar() {
               {/* Post - Hidden on mobile et quand pas connecté */}
               {session && (
                 <a
-                  href="createPost"
+                  href="/createPost"
                   className="hidden sm:flex relative rounded-xl bg-gray-100 dark:bg-gray-800 p-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 transition-all duration-200 hover:shadow-md group"
                 >
                   <span className="absolute -inset-1.5" />

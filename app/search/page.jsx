@@ -6,7 +6,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSearch } from "../hooks/useSearch";
-import PostComponent from "../components/post";
+import ModernPost from "../components/ModernPost";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -305,7 +305,7 @@ function ResultSection({ query, title, items, type, showAll = false }) {
             {type === "user" ? (
               <UserResultCard user={item} />
             ) : (
-              <PostComponent post={item} />
+              <ModernPost post={item} />
             )}
           </div>
         ))}

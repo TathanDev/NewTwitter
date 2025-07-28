@@ -2,8 +2,7 @@
 import React from "react";
 import { 
   Type, 
-  Image, 
-  Video, 
+  FileImage, 
   Quote, 
   Minus, 
   Link,
@@ -12,8 +11,7 @@ import {
 
 const COMPONENT_TYPES = [
   { type: 'text', icon: Type, label: 'Texte', color: 'bg-blue-500' },
-  { type: 'image', icon: Image, label: 'Image', color: 'bg-green-500' },
-  { type: 'video', icon: Video, label: 'Vidéo', color: 'bg-red-500' },
+  { type: 'media', icon: FileImage, label: 'Média', color: 'bg-green-500' },
   { type: 'quote', icon: Quote, label: 'Citation', color: 'bg-purple-500' },
   { type: 'link', icon: Link, label: 'Lien', color: 'bg-orange-500' },
   { type: 'spacer', icon: Minus, label: 'Espace', color: 'bg-gray-500' },

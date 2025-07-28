@@ -164,7 +164,7 @@ export default function UnifiedStyleEditor({ styleConfig, onStyleChange }) {
                 step="1"
                 value={parseInt(styleConfig.border?.width || '1')}
                 onChange={(e) => updateBorderWidth(`${e.target.value}px`)}
-                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                className="w-full h-2 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 dark:from-blue-500 dark:via-purple-600 dark:to-pink-600 rounded-lg appearance-none cursor-pointer slider"
               />
               <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                 <span>1px</span>
@@ -189,7 +189,7 @@ export default function UnifiedStyleEditor({ styleConfig, onStyleChange }) {
             step="4"
             value={parseInt(styleConfig.border?.radius || '12')}
             onChange={(e) => updateBorderRadius(`${e.target.value}px`)}
-            className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+            className="w-full h-2 bg-gradient-to-r from-orange-400 via-red-500 to-pink-600 dark:from-orange-500 dark:via-red-600 dark:to-pink-700 rounded-lg appearance-none cursor-pointer slider"
           />
           <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
             <span>0px</span>
