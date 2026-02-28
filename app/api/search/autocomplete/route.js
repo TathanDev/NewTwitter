@@ -180,12 +180,12 @@ export async function GET(request) {
         });
       });
 
-      if (Object.keys(hashtagCounts).length === 0 && searchTerm === "") {
+      /*if (Object.keys(hashtagCounts).length === 0 && searchTerm === "") {
         const defaultHashtags = ['javascript', 'react', 'nextjs', 'web', 'dev', 'coding', 'tech', 'programming'];
         defaultHashtags.forEach(tag => {
           hashtagCounts[tag] = 1;
         });
-      }
+      }*/
 
       const hashtagSuggestions = Object.entries(hashtagCounts)
         .map(([hashtag, count]) => ({

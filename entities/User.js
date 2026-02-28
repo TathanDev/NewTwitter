@@ -31,7 +31,7 @@ const User = sequelize.define(
     },
     pfp_user: {
       type: DataTypes.STRING(255),
-      defaultValue: "",
+      defaultValue: "/images/user-icon-dark.png",
     },
     birth_date: {
       type: DataTypes.DATEONLY,

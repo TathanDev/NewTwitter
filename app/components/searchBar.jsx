@@ -96,7 +96,7 @@ export default function SearchBar() {
           <div className="flex-1 relative" ref={searchRef}>
             {/* Suggestions dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-600/50 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto">
+              <div className="absolute bottom-full mb-2 left-0 right-0 bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-600/50 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto">
                 {suggestions.map((suggestion, index) => (
                   <button
                     key={`${suggestion.type}-${suggestion.id || index}`}
