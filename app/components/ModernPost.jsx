@@ -371,7 +371,6 @@ export default function ModernPost({ post, isDetailView = false, onCommentsCount
     const postUrl = `${window.location.origin}/post/${post.post_id}`;
 
     try {
-      // Tenter d'utiliser l'API Web Share si disponible
       if (navigator.share && navigator.canShare) {
         await navigator.share({
           title: `Post de ${post.author || "Utilisateur"}`,
@@ -379,13 +378,25 @@ export default function ModernPost({ post, isDetailView = false, onCommentsCount
           url: postUrl,
         });
       } else {
-        // Fallback : copier dans le presse-papiers
-        await navigator.clipboard.writeText(postUrl);
-        // Afficher la notification de succès
+        // Fallback clipboard avec double sécurité
+        if (navigator.clipboard?.writeText) {
+          // HTTPS / localhost
+          await navigator.clipboard.writeText(postUrl);
+        } else {
+          // HTTP : fallback via execCommand (déprécié mais fonctionne)
+          const textarea = document.createElement("textarea");
+          textarea.value = postUrl;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textarea);
+        }
+
         setShowCopyNotification(true);
-        setTimeout(() => {
-          setShowCopyNotification(false);
-        }, 3000);
+        setTimeout(() => setShowCopyNotification(false), 3000);
       }
     } catch (error) {
       console.error("Erreur lors du partage:", error);
