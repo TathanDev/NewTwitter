@@ -373,11 +373,11 @@ export default function MessagesPage() {
       </div>
 
       {/* Modal de nouvelle conversation */}
-      <NewConversationModal 
-        isOpen={isNewConversationModalOpen} 
+      <NewConversationModal
+        isOpen={isNewConversationModalOpen}
         onClose={() => setIsNewConversationModalOpen(false)}
         onConversationCreated={handleConversationCreated}
       />
-    </div>
+    </main>
   );
 }
