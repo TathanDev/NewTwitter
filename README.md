@@ -48,6 +48,25 @@ NewTwitter is a social media application developed with Next.js and React. It si
 - **Tailwind CSS**: Utility-first CSS framework for styling.
 - **SQLite3**: Relational database system.
 
+## Security - Rate Limiting
+
+The API implements rate limiting to prevent abuse. Limits are applied per IP address:
+
+| Endpoint | Limit (requests/min) |
+|----------|---------------------|
+| `/api/search*` | 30 |
+| `/api/messages/send` | 20 |
+| `/api/auth/*` | 30 |
+| `/api/getPosts`, `/api/posts` | 60 |
+| `/api/user/*`, `/api/messages/*` | 60 |
+| Other API routes | 100 |
+
+When a limit is exceeded, the API returns `429 Too Many Requests` with headers:
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Requests remaining in window
+- `X-RateLimit-Reset`: Unix timestamp when limit resets
+- `Retry-After`: Seconds to wait before retrying
+
 ## Contributing
 
 Feel free to fork the project and submit pull requests.
