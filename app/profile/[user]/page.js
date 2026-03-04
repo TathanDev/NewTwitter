@@ -333,10 +333,13 @@ export default function ProfilePage() {
 
                 <FollowButton targetUserId={userData.id_user} />
 
-                <button className="group px-6 py-3 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-300 rounded-2xl hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2">
-                  <span>⚙️</span>
-                  <span>Plus</span>
-                </button>
+                {/* Bouton Paramètres - uniquement pour son propre profil */}
+                {currentUser && currentUser.id_user === userData.id_user && (
+                  <a href="/settings" className="group px-6 py-3 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-300 rounded-2xl hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2">
+                    <span>⚙️</span>
+                    <span>Plus</span>
+                  </a>
+                )}
               </div>
           </div>
         </div>
