@@ -3,15 +3,24 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from '../context/UserContext';
+import { useTheme } from '@/utils/themeContext';
 import { ParsedText } from '../utils/textParser';
 
 // Composant pour rendre un composant individuel
-const ComponentRenderer = ({ component }) => {
+const ComponentRenderer = ({ component, postTheme, isSimplePost }) => {
+  // Pour les posts simples, utiliser le thème système ; pour les posts avancés, garder les couleurs personnalisées
+  const isDark = isSimplePost && postTheme === 'dark';
+  const textColor = isDark ? '#f3f4f6' : '#111827';
+  const secondaryColor = isDark ? '#9ca3af' : '#6b7280';
+
   switch (component.type) {
     case 'text':
       return (
-        <div 
-          style={component.data.formatting}
+        <div
+          style={{
+            ...component.data.formatting,
+            color: textColor
+          }}
           className="text-component"
         >
           <ParsedText text={component.data.content} />
@@ -147,12 +156,12 @@ const ComponentRenderer = ({ component }) => {
 
     case 'quote':
       return (
-        <blockquote className="pl-4 border-l-4 border-gray-300 dark:border-gray-600 italic bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-          <p className="text-gray-800 dark:text-gray-200 text-lg">
+        <blockquote className="pl-4 border-l-4 italic p-4 rounded-lg" style={{ borderColor: isDark ? '#4b5563' : '#d1d5db', backgroundColor: isDark ? '#374151' : '#f9fafb' }}>
+          <p className="text-lg" style={{ color: isDark ? '#f3f4f6' : '#1f2937' }}>
             "{component.data.text}"
           </p>
           {component.data.author && (
-            <footer className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            <footer className="text-sm mt-2" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
               — {component.data.author}
             </footer>
           )}
@@ -161,17 +170,18 @@ const ComponentRenderer = ({ component }) => {
 
     case 'link':
       return (
-        <div className="border border-blue-200 dark:border-blue-700 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
-          <a 
-            href={component.data.url} 
-            target="_blank" 
+        <div className="border rounded-lg p-4 transition-colors" style={{ borderColor: isDark ? '#3b82f6' : '#bfdbfe', backgroundColor: isDark ? '#1e3a5f' : '#eff6ff' }}>
+          <a
+            href={component.data.url}
+            target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 dark:text-blue-400 hover:underline font-medium block"
+            className="hover:underline font-medium block"
+            style={{ color: isDark ? '#60a5fa' : '#2563eb' }}
           >
             {component.data.title || component.data.url || 'Lien'}
           </a>
           {component.data.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm mt-1" style={{ color: isDark ? '#9ca3af' : '#4b5563' }}>
               {component.data.description}
             </p>
           )}
@@ -197,11 +207,18 @@ const ComponentRenderer = ({ component }) => {
 };
 
 // Fonction pour obtenir le style du post
-const getPostStyle = (styleConfig) => {
+const getPostStyle = (styleConfig, postTheme, isSimplePost) => {
+  // Si c'est un post simple, toujours utiliser le thème système
+  // Si c'est un post avancé, garder les couleurs personnalisées
+  const isDark = isSimplePost && postTheme === 'dark';
+
+  const defaultBorderColor = isDark ? '#374151' : '#e5e7eb'; // gray-700 ou gray-200
+  const defaultBgColor = isDark ? '#1f2937' : '#ffffff'; // gray-800 ou white
+
   const style = {
     borderRadius: styleConfig.border?.radius || '12px',
-    border: styleConfig.border?.style !== 'none' 
-      ? `${styleConfig.border?.width || '1px'} ${styleConfig.border?.style || 'solid'} ${styleConfig.border?.color || '#e0e0e0'}`
+    border: styleConfig.border?.style !== 'none'
+      ? `${styleConfig.border?.width || '1px'} ${styleConfig.border?.style || 'solid'} ${isSimplePost ? defaultBorderColor : (styleConfig.border?.color || defaultBorderColor)}`
       : 'none'
   };
 
@@ -210,8 +227,9 @@ const getPostStyle = (styleConfig) => {
     const { from, to, direction } = styleConfig.background.gradient;
     style.background = `linear-gradient(${direction || '45deg'}, ${from}, ${to})`;
   } else {
-    // Utiliser un fond blanc par défaut au lieu de transparent
-    style.backgroundColor = styleConfig.background?.value || '#ffffff';
+    // Pour les posts simples, utiliser le fond par défaut basé sur le thème système
+    // Pour les posts avancés, garder le fond personnalisé
+    style.backgroundColor = isSimplePost ? defaultBgColor : (styleConfig.background?.value || defaultBgColor);
   }
 
   return style;
@@ -220,6 +238,16 @@ const getPostStyle = (styleConfig) => {
 export default function ModernPost({ post, isDetailView = false, onCommentsCountChange, externalCommentsCount }) {
   const { currentUser } = useUser();
   const router = useRouter();
+  const { theme: systemTheme } = useTheme();
+
+  // Récupérer le styleConfig du post
+  const styleConfig = post.style_config || {};
+
+  // Si le post a un champ 'theme' dans styleConfig, c'est un post "simple" donc on utilise le thème système
+  // Sinon (post "avancé"), on garde les couleurs personnalisées
+  const isSimplePost = styleConfig?.theme !== undefined;
+  const postTheme = isSimplePost ? systemTheme : undefined;
+  const isPostDark = postTheme === 'dark';
   
   // États locaux pour les interactions
   const [isLiked, setIsLiked] = useState(false);
@@ -524,9 +552,8 @@ export default function ModernPost({ post, isDetailView = false, onCommentsCount
   }
 
   const components = post.content_structure?.components || [];
-  const styleConfig = post.style_config || {};
-  
-  
+
+
   // Trier les composants par ordre (vérifier que l'ordre existe)
   const sortedComponents = components.sort((a, b) => (a.order || 0) - (b.order || 0));
 
@@ -657,7 +684,15 @@ export default function ModernPost({ post, isDetailView = false, onCommentsCount
         className={`max-w-2xl px-4 mx-auto bg-white dark:bg-gray-800 shadow-lg overflow-hidden transition-colors duration-300 ${
           !isDetailView ? "cursor-pointer hover:shadow-xl" : ""
         }`}
-        style={getPostStyle(styleConfig)}
+        style={{
+          ...getPostStyle(styleConfig, postTheme, isSimplePost),
+          // Variables CSS pour le thème du post
+          '--post-text-primary': isPostDark ? '#f3f4f6' : '#111827',
+          '--post-text-secondary': isPostDark ? '#9ca3af' : '#6b7280',
+          '--post-bg-secondary': isPostDark ? '#374151' : '#f3f4f6',
+          '--post-border-color': isPostDark ? '#4b5563' : '#e5e7eb',
+        }}
+        data-post-theme={postTheme}
         onClick={handlePostClick}
       >
         {/* En-tête du post */}
@@ -689,16 +724,16 @@ export default function ModernPost({ post, isDetailView = false, onCommentsCount
                   />
                 </Link>
                 <div className="flex-1">
-                  <Link 
+                  <Link
                     href={`/profile/${author?.pseudo_user || post.author}`}
                     className="hover:underline hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                    <h3 className="font-semibold" style={{ color: isPostDark ? '#f3f4f6' : '#111827' }}>
                       {author?.pseudo_user || post.author}
                     </h3>
                   </Link>
-                  <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center space-x-2 text-sm" style={{ color: isPostDark ? '#9ca3af' : '#6b7280' }}>
                     <span>@{author?.pseudo_user || post.author}</span>
                     <span>•</span>
                     <span>{new Date(post.time).toLocaleDateString()}</span>
@@ -723,25 +758,28 @@ export default function ModernPost({ post, isDetailView = false, onCommentsCount
             <ComponentRenderer
               key={component.id}
               component={component}
+              postTheme={postTheme}
+              isSimplePost={isSimplePost}
             />
           ))}
         </div>
 
         {/* Boutons d'action */}
-        <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+        <div className="px-6 py-4 border-t" style={{ borderColor: isPostDark ? '#4b5563' : '#e5e7eb' }}>
           <div className="flex items-center justify-around">
-            <button 
+            <button
               onClick={handleLike}
               disabled={isLikeLoading}
               className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
                 isLiked
                   ? "text-red-500 bg-red-50 dark:bg-red-900/20"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-700"
               } ${
                 isLikeLoading
                   ? "opacity-50 cursor-not-allowed"
                   : "cursor-pointer"
               } ${!currentUser?.id_user ? "opacity-50" : ""}`}
+              style={{ color: isPostDark ? '#9ca3af' : '#6b7280' }}
               title={!currentUser?.id_user ? "Connectez-vous pour liker" : ""}
             >
               <svg className={`w-5 h-5 ${isLiked ? "fill-current" : ""} ${
@@ -753,39 +791,43 @@ export default function ModernPost({ post, isDetailView = false, onCommentsCount
             </button>
             <button 
               onClick={handleComment}
-              className="flex items-center space-x-2 px-4 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-500 transition-all duration-200"
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-500 transition-all duration-200"
+              style={{ color: isPostDark ? '#9ca3af' : '#6b7280' }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               <span className="font-medium">{externalCommentsCount || post.comments_count || 0}</span>
             </button>
-            <button 
+            <button
               onClick={handleShare}
-              className="flex items-center space-x-2 px-4 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-green-500 transition-all duration-200"
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-green-500 transition-all duration-200"
+              style={{ color: isPostDark ? '#9ca3af' : '#6b7280' }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
               </svg>
             </button>
-            <button 
+            <button
               onClick={handleBookmark}
               className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
                 isSaved
                   ? "text-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-700"
               }`}
+              style={{ color: isSaved ? '#3b82f6' : (isPostDark ? '#9ca3af' : '#6b7280') }}
             >
               <svg className={`w-5 h-5 ${isSaved ? "fill-current" : ""}`} fill={isSaved ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
             </button>
-            
+
             {/* Bouton Delete - visible seulement pour l'auteur */}
             {canDeletePost && (
               <button
                 onClick={handleDelete}
-                className="flex items-center space-x-2 px-4 py-2 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
+                className="flex items-center space-x-2 px-4 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
+                style={{ color: isPostDark ? '#f87171' : '#dc2626' }}
                 title="Supprimer ce post"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

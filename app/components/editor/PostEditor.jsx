@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,9 @@ import PostCanvas from "./PostCanvas";
 import ComponentProperties from "./ComponentProperties";
 import UnifiedStyleEditor from "./UnifiedStyleEditor";
 import { createPost } from "@/app/actions/post";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { useTheme } from '@/utils/themeContext';
 
 const getDefaultData = (type) => {
   switch (type) {
@@ -55,6 +58,7 @@ const getDefaultData = (type) => {
 };
 
 export default function PostEditor({ user, onClose }) {
+  const { theme } = useTheme();
   const [components, setComponents] = useState([]);
   const [styleConfig, setStyleConfig] = useState({
     background: {
@@ -66,9 +70,25 @@ export default function PostEditor({ user, onClose }) {
       width: "1px",
       color: "#e0e0e0",
       radius: "12px"
-    },
-    theme: "light"
+    }
   });
+
+  // Initialiser le styleConfig selon le thème système
+  useEffect(() => {
+    const isDark = theme === "dark";
+    setStyleConfig({
+      background: {
+        type: "solid",
+        value: isDark ? "#1f2937" : "#ffffff"
+      },
+      border: {
+        style: "solid",
+        width: "1px",
+        color: isDark ? "#374151" : "#e5e7eb",
+        radius: "12px"
+      }
+    });
+  }, []);
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [previewMode, setPreviewMode] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -208,7 +228,17 @@ export default function PostEditor({ user, onClose }) {
         {/* Header */}
         <div className="text-center mb-8 relative">
           <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 dark:from-blue-400/30 dark:via-purple-400/30 dark:to-pink-400/30 rounded-3xl blur-2xl"></div>
-          
+
+          <div className="flex justify-start mb-4">
+            <Link
+              href="/createPost"
+              className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Retour
+            </Link>
+          </div>
+
           <div className="relative">
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight mb-2">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">

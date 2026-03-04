@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Styles pour les posts avec thème personnalisé */
+[data-post-theme="light"] {
+  --post-text-primary: #111827;
+  --post-text-secondary: #6b7280;
+  --post-bg-secondary: #f3f4f6;
+  --post-border-color: #e5e7eb;
+}
+
+[data-post-theme="dark"] {
+  --post-text-primary: #f3f4f6;
+  --post-text-secondary: #9ca3af;
+  --post-bg-secondary: #374151;
+  --post-border-color: #4b5563;
+}
+
+/* Styles pour le contenu du post basé sur le thème du post */
+[data-post-theme] .post-content {
+  color: var(--post-text-primary);
+}
+
+[data-post-theme] .post-content-secondary {
+  color: var(--post-text-secondary);
+}
+
+[data-post-theme] .post-bg-secondary {
+  background-color: var(--post-bg-secondary);
+}
+
+[data-post-theme] .post-border-color {
+  border-color: var(--post-border-color);
+}
+
 .hide-scrollbar {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE 10+ */

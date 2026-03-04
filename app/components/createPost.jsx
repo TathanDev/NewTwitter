@@ -1,8 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createPost } from "@/app/actions/post";
 import MentionAutocomplete from './MentionAutocomplete';
 import { ParsedText } from '../utils/textParser';
+import { useTheme } from '@/utils/themeContext';
 import {
   Heart,
   MessageCircle,
@@ -13,17 +14,44 @@ import {
   X,
   Eye,
   Send,
+  ArrowLeft,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function CreatePostPage({ user }) {
+  const { theme } = useTheme();
   const [postContent, setPostContent] = useState("");
   const [components, setComponents] = useState([]);
-  const [styleConfig, setStyleConfig] = useState({});
+  const [styleConfig, setStyleConfig] = useState({
+    background: {
+      type: "solid",
+      value: "#ffffff"
+    },
+    theme: "light"
+  });
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [filePreviews, setFilePreviews] = useState([]);
   const [fileTypes, setFileTypes] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+
+  // Mettre à jour le styleConfig quand le thème change
+  useEffect(() => {
+    const isDark = theme === "dark";
+    setStyleConfig({
+      background: {
+        type: "solid",
+        value: isDark ? "#1f2937" : "#ffffff" // gray-800 ou white
+      },
+      border: {
+        style: "solid",
+        width: "1px",
+        color: isDark ? "#374151" : "#e5e7eb", // gray-700 ou gray-200
+        radius: "12px"
+      },
+      theme: isDark ? "dark" : "light"
+    });
+  }, [theme]);
 
   // Données de l'utilisateur simulées
   const currentUser = {
@@ -192,12 +220,17 @@ export default function CreatePostPage({ user }) {
         text: postContent, // Garde la compatibilité avec l'ancien système
         media: uploadedFiles.length > 0 ? uploadedFiles[0].url : "", // Garde la compatibilité avec l'ancien système
       };
-      createPost(data);
-      setPostContent("");
-      setComponents([]);
-      setSelectedFiles([]);
-      setFilePreviews([]);
-      setFileTypes([]);
+
+      try {
+        await createPost(data);
+        setPostContent("");
+        setComponents([]);
+        setSelectedFiles([]);
+        setFilePreviews([]);
+        setFileTypes([]);
+      } catch (error) {
+        console.error("Erreur lors de la publication:", error);
+      }
     }
   };
 
@@ -331,11 +364,19 @@ export default function CreatePostPage({ user }) {
       <div className="max-w-4xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <div></div>
+          <div className="flex justify-start mb-4">
+            <Link
+              href="/createPost"
+              className="inline-flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Retour
+            </Link>
+          </div>
           <div className="relative">
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-                Créer un Post
+                Mode Simple
               </span>
             </h1>
             <p className="text-gray-600 dark:text-gray-400"></p>

@@ -8,6 +8,7 @@ export default function SearchBar() {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [hasFocused, setHasFocused] = useState(false);
 
   const { results, loading, suggestions, search, getSuggestions } = useSearch();
   const router = useRouter();
@@ -20,24 +21,21 @@ export default function SearchBar() {
     { value: "hashtags", label: "Hashtags", icon: "#️⃣" },
   ];
 
-  // Gestion de l'autocomplétion
-  useEffect(() => {
-    console.log('SearchBar: searchQuery changed:', searchQuery, 'selectedFilter:', selectedFilter);
-    if (searchQuery.length >= 0) { // Permettre les recherches vides
+  // Gestion de l'autocomplétion - seulement au focus
+  const handleFocus = () => {
+    setHasFocused(true);
+    if (searchQuery.length >= 0) {
       getSuggestions(searchQuery, selectedFilter);
       setShowSuggestions(true);
-    } else {
-      setShowSuggestions(false);
     }
-  }, [searchQuery, selectedFilter, getSuggestions]);
+  };
 
-  // Afficher les suggestions quand elles arrivent
+  // Mettre à jour les suggestions quand elles changent (uniquement si on a déjà cliqué)
   useEffect(() => {
-    console.log('SearchBar: suggestions updated:', suggestions.length, suggestions);
-    if (suggestions.length > 0) {
+    if (hasFocused && suggestions.length > 0) {
       setShowSuggestions(true);
     }
-  }, [suggestions]);
+  }, [suggestions, hasFocused]);
 
   // Fermer les suggestions en cliquant ailleurs
   useEffect(() => {
@@ -142,15 +140,7 @@ export default function SearchBar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                onFocus={() => {
-                  console.log('SearchBar: onFocus, searchQuery:', searchQuery, 'suggestions:', suggestions.length);
-                  if (suggestions.length > 0) {
-                    setShowSuggestions(true);
-                  } else {
-                    // Trigger a new search to get suggestions
-                    getSuggestions(searchQuery, selectedFilter);
-                  }
-                }}
+                onFocus={handleFocus}
                 placeholder="Rechercher sur NewT..."
                 className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300/50 dark:border-gray-600/50 rounded-xl text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-400/50 focus:border-blue-500 dark:focus:border-blue-400 transition-all duration-300 shadow-sm hover:shadow-md"
               />
