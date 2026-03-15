@@ -122,9 +122,9 @@ const formatTimeAgo = (dateString) => {
 };
 
 // Fonction simulée pour récupérer les données utilisateur
-const getUser = async (pseudo) => {
+const getUser = async (author, authorId) => {
   try {
-    if (!pseudo) {
+    if (!author && !authorId) {
       throw new Error("Pseudo manquant");
     }
 
@@ -246,7 +246,7 @@ export default function PostComponent({
         setUserError(null);
 
         // Récupérer les données utilisateur
-        const userData = await getUser(post.author);
+        const userData = await getUser(post.author, post.author_id);
         setAuthor(userData);
 
         // Utiliser le compteur externe s'il est fourni, sinon utiliser celui du post

@@ -20,6 +20,9 @@
 # production
 /build
 
+# claude / MCP log
+/.playwright-mcp/
+
 # misc
 .DS_Store
 *.pem

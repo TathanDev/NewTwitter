@@ -243,7 +243,7 @@ export default function ProfilePage() {
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-800/40 p-4 rounded-2xl shadow-lg border border-blue-200/50 dark:border-blue-600/40 text-center group hover:shadow-xl transition-all duration-300">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 opacity-0 rounded-2xl"></div>
                   <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 relative z-10">
-                    42
+                    {stats.data.postsCount || 0}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 relative z-10">
                     Publications

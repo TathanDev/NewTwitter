@@ -1,9 +1,9 @@
   🔐 Sécurité
 
-  1. Rate limiting - Limiter les requêtes API pour éviter les abus (surtout login/register)
-  2. Validation côté serveur - Vérifier les entrées utilisateur avec Zod dans les Server Actions
-  3. CSRF protection - Les tokens CSRF sont déjà gérés par Next.js, mais vérifier que c'est bien activé
-  4. Sanitization HTML - Utiliser une librairie comme dompurify pour nettoyer les posts/comments
+  1. ✅ Rate limiting - Limite les requêtes par IP (middleware.js)
+  2. ✅ Validation côté serveur - Zod dans Server Actions (auth.js, post.js)
+  3. ✅ CSRF protection - Next.js built-in + security headers (next.config.mjs)
+  4. ✅ Sanitization HTML - DOMPurify intégré (textParser.js)
 
   ✨ Features
 
@@ -19,7 +19,7 @@
 
   1. Gestion hors-ligne - Que se passe-t-il si le serveur Socket.IO est down ?
   2. Déconnexion automatique - Token expire après 7 jours, mais pas de refresh token automatique
-  3. Validation mot de passe - Pas de vérification de force minimale lors de l'inscription
+  3. ✅ Validation mot de passe - Vérification de force avec Zod (min 8 chars, 1 uppercase, 1 number, 1 special)
 
   🚀 Améliorations techniques
 

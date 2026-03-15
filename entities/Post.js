@@ -13,6 +13,11 @@ const Post = sequelize.define(
     author: {
       type: DataTypes.STRING(255),
     },
+    // Stocker l'ID utilisateur pour résoudre le pseudo actuel
+    author_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     // Nouveau : structure JSON pour le contenu modulaire
     content_structure: {
       type: DataTypes.JSON,

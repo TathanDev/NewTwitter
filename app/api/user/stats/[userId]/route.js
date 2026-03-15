@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Follow from "@/entities/Follow";
 import User from "@/entities/User";
+import Post from "@/entities/Post";
 import sequelize from "@/utils/sequelize";
 
 // GET - Récupérer les statistiques d'un utilisateur
@@ -26,14 +27,12 @@ export async function GET(request, { params }) {
 
     await sequelize.sync();
 
-    // Compter les abonnés et les abonnements
-    const [followersCount, followingCount] = await Promise.all([
+    // Compter les abonnés, les abonnements et les posts
+    const [followersCount, followingCount, postsCount] = await Promise.all([
       Follow.count({ where: { following_id: userId } }), // Nombre d'abonnés
       Follow.count({ where: { follower_id: userId } }),   // Nombre d'abonnements
+      Post.count({ where: { author: userId } }),            // Nombre de posts
     ]);
-
-    // Ici vous pourriez aussi ajouter le nombre de posts
-    // const postsCount = await Post.count({ where: { author: userId } });
 
     return NextResponse.json({
       success: true,
@@ -41,7 +40,7 @@ export async function GET(request, { params }) {
         userId: parseInt(userId),
         followersCount,
         followingCount,
-        // postsCount,
+        postsCount,
       },
     });
   } catch (error) {

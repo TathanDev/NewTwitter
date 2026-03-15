@@ -3,16 +3,27 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 /**
+ * Sanitize input by stripping HTML tags to prevent XSS
+ * @param {string} text - The text to sanitize
+ * @returns {string} - Sanitized text
+ */
+function sanitizeWithDOMPurify(text) {
+  if (!text) return '';
+  // Strip all HTML tags - simple but effective
+  return text.replace(/<[^>]*>/g, '');
+}
+
+/**
  * Composant pour les liens de hashtags qui redirigent vers la recherche
  */
 function HashtagLink({ hashtag }) {
   const router = useRouter();
-  
+
   const handleHashtagClick = (e) => {
     e.stopPropagation();
     router.push(`/search?q=${encodeURIComponent(hashtag)}&type=hashtags`);
   };
-  
+
   return (
     <span
       className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 font-medium hover:underline cursor-pointer"
@@ -32,12 +43,15 @@ function HashtagLink({ hashtag }) {
 export function parseText(text) {
   if (!text) return [];
 
+  // Sanitize input before parsing
+  const sanitizedText = sanitizeWithDOMPurify(text);
+
   // Créer un regex combiné pour split le texte
   const combinedRegex = /(@\w+|#\w+)/g;
-  
+
   // Split le texte en gardant les délimiteurs
-  const parts = text.split(combinedRegex);
-  
+  const parts = sanitizedText.split(combinedRegex);
+
   return parts.map((part, index) => {
     // Vérifier si c'est une mention
     const mentionMatch = part.match(/^@(\w+)$/);
@@ -54,7 +68,7 @@ export function parseText(text) {
         </Link>
       );
     }
-    
+
     // Vérifier si c'est un hashtag
     const hashtagMatch = part.match(/^#(\w+)$/);
     if (hashtagMatch) {
@@ -66,7 +80,7 @@ export function parseText(text) {
         />
       );
     }
-    
+
     // Texte normal
     return part;
   });
@@ -78,7 +92,7 @@ export function parseText(text) {
  */
 export function ParsedText({ text, className = "" }) {
   const parsedElements = parseText(text);
-  
+
   return (
     <span className={className}>
       {parsedElements}

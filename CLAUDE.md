@@ -78,3 +78,8 @@ utils/
 - SQLite file: `db.sqlite`
 - Models in `entities/` define schema
 - `utils/sequelize.js` initializes connection and syncs on startup
+
+## Instruction
+
+Always use Context7 MCP when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
+Always use playwright MCP when you need to interact with a web browser, without me having to explicitly ask

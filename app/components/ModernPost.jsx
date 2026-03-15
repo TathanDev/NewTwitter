@@ -273,7 +273,9 @@ export default function ModernPost({ post, isDetailView = false, onCommentsCount
         setIsLoadingUser(true);
         setUserError(null);
 
-        const response = await fetch(`/api/user/${post.author}`);
+        // Utiliser author_id si disponible pour récupérer les données actuelles de l'utilisateur
+        const userIdentifier = post.author_id || post.author;
+        const response = await fetch(`/api/user/${userIdentifier}`);
         if (!response.ok) {
           throw new Error(`Erreur HTTP: ${response.status}`);
         }
@@ -297,7 +299,7 @@ export default function ModernPost({ post, isDetailView = false, onCommentsCount
     if (post.author) {
       loadUser();
     }
-  }, [post.author]);
+  }, [post.author, post.author_id]);
 
   // Effect pour initialiser les états utilisateur (likes, favoris)
   useEffect(() => {
